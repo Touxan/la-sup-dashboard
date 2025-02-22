@@ -33,7 +33,7 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
     <>
       <Sidebar className="border-r border-border">
         <div className="p-4 flex items-center gap-2">
-          <SidebarTrigger asChild>
+          <SidebarTrigger>
             <Button variant="ghost" size="icon" className="hover:bg-accent">
               <ChevronLeft className="h-4 w-4" />
             </Button>
@@ -47,8 +47,8 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
               <SidebarMenu>
                 {menuItems.map((item) => (
                   <SidebarMenuItem key={item.label}>
-                    <SidebarMenuButton asChild>
-                      <a href={item.href}>
+                    <SidebarMenuButton>
+                      <a href={item.href} className="flex items-center gap-2">
                         <Menu className="w-4 h-4" />
                         <span>{item.label}</span>
                       </a>
@@ -64,7 +64,7 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
       <div className="flex-1 flex flex-col min-h-screen">
         <header className="h-14 border-b border-border px-6 flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <SidebarTrigger asChild>
+            <SidebarTrigger>
               <Button variant="ghost" size="icon" className="lg:hidden">
                 <Menu className="h-5 w-5" />
               </Button>
