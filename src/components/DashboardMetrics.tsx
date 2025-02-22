@@ -4,15 +4,15 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
 const metrics = [
   {
-    title: "Serveurs",
+    title: "Servers",
     value: "45",
-    status: "Tous opérationnels",
+    status: "All operational",
     icon: Server,
   },
   {
-    title: "Sécurité",
+    title: "Security",
     value: "98%",
-    status: "Score global",
+    status: "Global score",
     icon: Shield,
   },
   {

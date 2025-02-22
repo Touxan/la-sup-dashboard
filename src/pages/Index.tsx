@@ -11,8 +11,8 @@ const Index = () => {
           <div className="p-6 space-y-6 w-full max-w-7xl mx-auto">
             <div className="flex items-center justify-between">
               <div>
-                <span className="text-sm font-medium text-muted-foreground">Vue d'ensemble</span>
-                <h1 className="text-3xl font-semibold tracking-tight">Tableau de bord</h1>
+                <span className="text-sm font-medium text-muted-foreground">Overview</span>
+                <h1 className="text-3xl font-semibold tracking-tight">Dashboard</h1>
               </div>
             </div>
             <DashboardMetrics />

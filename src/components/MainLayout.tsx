@@ -1,5 +1,5 @@
 
-import { Menu, User, ChevronLeft } from "lucide-react"
+import { Menu, User, ChevronLeft, Server, Activity, Shield, Cog } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -8,6 +8,9 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
+  DropdownMenuSub,
+  DropdownMenuSubTrigger,
+  DropdownMenuSubContent,
 } from "@/components/ui/dropdown-menu"
 import {
   Sidebar,
@@ -22,10 +25,46 @@ import {
 } from "@/components/ui/sidebar"
 
 const menuItems = [
-  { label: "Infrastructure", href: "#" },
-  { label: "Monitoring", href: "#" },
-  { label: "Sécurité", href: "#" },
-  { label: "Automatisation", href: "#" },
+  {
+    label: "Infrastructure",
+    icon: Server,
+    subItems: [
+      { label: "Servers", href: "#" },
+      { label: "Networks", href: "#" },
+      { label: "Storage", href: "#" },
+      { label: "Load Balancers", href: "#" },
+    ],
+  },
+  {
+    label: "Monitoring",
+    icon: Activity,
+    subItems: [
+      { label: "Metrics", href: "#" },
+      { label: "Alerts", href: "#" },
+      { label: "Logs", href: "#" },
+      { label: "Traces", href: "#" },
+    ],
+  },
+  {
+    label: "Security",
+    icon: Shield,
+    subItems: [
+      { label: "Access Control", href: "#" },
+      { label: "Certificates", href: "#" },
+      { label: "Firewall", href: "#" },
+      { label: "Compliance", href: "#" },
+    ],
+  },
+  {
+    label: "Automation",
+    icon: Cog,
+    subItems: [
+      { label: "Workflows", href: "#" },
+      { label: "Templates", href: "#" },
+      { label: "Scripts", href: "#" },
+      { label: "Schedules", href: "#" },
+    ],
+  },
 ]
 
 const MainLayout = ({ children }: { children: React.ReactNode }) => {
@@ -47,12 +86,23 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
               <SidebarMenu>
                 {menuItems.map((item) => (
                   <SidebarMenuItem key={item.label}>
-                    <SidebarMenuButton>
-                      <a href={item.href} className="flex items-center gap-2">
-                        <Menu className="w-4 h-4" />
-                        <span>{item.label}</span>
-                      </a>
-                    </SidebarMenuButton>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <SidebarMenuButton>
+                          <div className="flex items-center gap-2">
+                            <item.icon className="w-4 h-4" />
+                            <span>{item.label}</span>
+                          </div>
+                        </SidebarMenuButton>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent side="right" className="w-48">
+                        {item.subItems.map((subItem) => (
+                          <DropdownMenuItem key={subItem.label} asChild>
+                            <a href={subItem.href}>{subItem.label}</a>
+                          </DropdownMenuItem>
+                        ))}
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </SidebarMenuItem>
                 ))}
               </SidebarMenu>
@@ -78,13 +128,13 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56">
-              <DropdownMenuLabel>Mon compte</DropdownMenuLabel>
+              <DropdownMenuLabel>My Account</DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem>Paramètres</DropdownMenuItem>
-              <DropdownMenuItem>Clés API</DropdownMenuItem>
-              <DropdownMenuItem>Gestion IAM</DropdownMenuItem>
+              <DropdownMenuItem>Settings</DropdownMenuItem>
+              <DropdownMenuItem>API Keys</DropdownMenuItem>
+              <DropdownMenuItem>IAM Management</DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem>Déconnexion</DropdownMenuItem>
+              <DropdownMenuItem>Sign Out</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </header>
