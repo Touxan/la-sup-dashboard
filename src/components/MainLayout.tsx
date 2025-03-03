@@ -1,5 +1,6 @@
 
 import { Menu, User, ChevronLeft, Server, Activity, Shield, Cog } from "lucide-react"
+import { Link } from "react-router-dom"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -59,7 +60,7 @@ const menuItems = [
     label: "Automation",
     icon: Cog,
     subItems: [
-      { label: "Workflows", href: "#" },
+      { label: "Workflows", href: "/automation/workflows" },
       { label: "Templates", href: "#" },
       { label: "Scripts", href: "#" },
       { label: "Schedules", href: "#" },
@@ -73,9 +74,7 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
       <Sidebar className="border-r border-border">
         <div className="p-4 flex items-center gap-2">
           <SidebarTrigger>
-            <Button variant="ghost" size="icon" className="hover:bg-accent">
-              <ChevronLeft className="h-4 w-4" />
-            </Button>
+            <ChevronLeft className="h-4 w-4" />
           </SidebarTrigger>
           <span className="font-semibold">la-sup</span>
         </div>
@@ -87,18 +86,16 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
                 {menuItems.map((item) => (
                   <SidebarMenuItem key={item.label}>
                     <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
+                      <DropdownMenuTrigger>
                         <SidebarMenuButton>
-                          <div className="flex items-center gap-2">
-                            <item.icon className="w-4 h-4" />
-                            <span>{item.label}</span>
-                          </div>
+                          <item.icon className="w-4 h-4" />
+                          <span>{item.label}</span>
                         </SidebarMenuButton>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent side="right" className="w-48">
                         {item.subItems.map((subItem) => (
                           <DropdownMenuItem key={subItem.label} asChild>
-                            <a href={subItem.href}>{subItem.label}</a>
+                            <Link to={subItem.href}>{subItem.label}</Link>
                           </DropdownMenuItem>
                         ))}
                       </DropdownMenuContent>
@@ -115,9 +112,7 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
         <header className="h-14 border-b border-border px-6 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <SidebarTrigger>
-              <Button variant="ghost" size="icon" className="lg:hidden">
-                <Menu className="h-5 w-5" />
-              </Button>
+              <Menu className="h-5 w-5" />
             </SidebarTrigger>
           </div>
 
