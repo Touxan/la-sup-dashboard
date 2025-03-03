@@ -85,7 +85,7 @@ interface Workflow {
 // Function to fetch workflow data
 const fetchWorkflows = async (): Promise<Workflow[]> => {
   try {
-    const response = await fetch("http://localhost:5678/webhook-test/673da098-0a03-42a1-ba35-c90ffc25a92c");
+    const response = await fetch("http://localhost:5678/webhook/673da098-0a03-42a1-ba35-c90ffc25a92c");
     
     if (!response.ok) {
       throw new Error(`Failed to fetch workflows: ${response.status}`);
@@ -130,17 +130,41 @@ const getTriggerType = (workflow: Workflow): string => {
 };
 
 const Workflows = () => {
-  const { data: workflows, isLoading, error } = useQuery({
+  const { data: workflows, isLoading, error, refetch } = useQuery({
     queryKey: ["workflows"],
     queryFn: fetchWorkflows,
   });
 
-  const toggleWorkflowStatus = (id: string, currentStatus: boolean) => {
-    // In a real app, this would make an API call to toggle the status
-    toast({
-      title: `Workflow ${currentStatus ? "deactivated" : "activated"}`,
-      description: `Workflow status would be updated on the server`,
-    });
+  const toggleWorkflowStatus = async (id: string, currentStatus: boolean) => {
+    try {
+      // Make API call to toggle workflow status
+      const response = await fetch(`http://localhost:5678/webhook/8a808ea7-2b9a-4ea5-b78a-ae67d1500156`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ active: !currentStatus, id: id}),
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Failed to update workflow status: ${response.status}`);
+      }
+      
+      // Refetch workflows to update the UI
+      refetch();
+      
+      toast({
+        title: `Workflow ${currentStatus ? "deactivated" : "activated"}`,
+        description: `The workflow status has been updated successfully.`,
+      });
+    } catch (error) {
+      console.error("Error updating workflow status:", error);
+      toast({
+        title: "Failed to update workflow status",
+        description: error instanceof Error ? error.message : "An unknown error occurred",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
@@ -153,7 +177,7 @@ const Workflows = () => {
                 <span className="text-sm font-medium text-muted-foreground">Automation</span>
                 <h1 className="text-3xl font-semibold tracking-tight">Workflows</h1>
               </div>
-              <Button size="sm">
+              <Button size="sm" onClick={() => window.open('http://localhost:5678/home/workflows', '_blank')}>
                 <Code2 className="mr-2 h-4 w-4" />
                 Create Workflow
               </Button>
@@ -189,7 +213,7 @@ const Workflows = () => {
                 </CardHeader>
                 <CardContent>
                   <p className="text-sm text-muted-foreground">
-                    Make sure the endpoint at http://localhost:5678/webhook-test/673da098-0a03-42a1-ba35-c90ffc25a92c is accessible.
+                    Make sure the endpoint at http://localhost:5678/webhook/673da098-0a03-42a1-ba35-c90ffc25a92c is accessible.
                   </p>
                 </CardContent>
                 <CardFooter>
@@ -301,12 +325,12 @@ const Workflows = () => {
                       </div>
                     </CardContent>
                     <CardFooter className="pt-0 flex justify-between">
-                      <Button variant="ghost" size="sm" asChild>
-                        <Link to={`/automation/workflows/${workflow.id}`}>
-                          View Details
-                        </Link>
-                      </Button>
-                      <Button variant="outline" size="sm" className="flex items-center gap-1">
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="flex items-center gap-1"
+                        onClick={() => window.open(`http://localhost:5678/workflow/${workflow.id}`, '_blank')}
+                      >
                         <ExternalLink className="h-3 w-3" />
                         Edit
                       </Button>
