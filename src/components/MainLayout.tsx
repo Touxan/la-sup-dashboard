@@ -61,8 +61,7 @@ const menuItems = [
     icon: Cog,
     subItems: [
       { label: "Workflows", href: "/automation/workflows" },
-      { label: "Templates", href: "#" },
-      { label: "Scripts", href: "#" },
+      { label: "Executions", href: "/automation/executions" },
       { label: "Schedules", href: "#" },
     ],
   },
