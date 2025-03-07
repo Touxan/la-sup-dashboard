@@ -9,9 +9,6 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-  DropdownMenuSub,
-  DropdownMenuSubTrigger,
-  DropdownMenuSubContent,
 } from "@/components/ui/dropdown-menu"
 import {
   Sidebar,
@@ -23,6 +20,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarProvider,
 } from "@/components/ui/sidebar"
 
 const menuItems = [
@@ -69,75 +67,77 @@ const menuItems = [
 
 const MainLayout = ({ children }: { children: React.ReactNode }) => {
   return (
-    <>
-      <Sidebar className="border-r border-border">
-        <div className="p-4 flex items-center gap-2">
-          <SidebarTrigger>
-            <ChevronLeft className="h-4 w-4" />
-          </SidebarTrigger>
-          <span className="font-semibold">la-sup</span>
-        </div>
-        <SidebarContent>
-          <SidebarGroup>
-            <SidebarGroupLabel>Navigation</SidebarGroupLabel>
-            <SidebarGroupContent>
-              <SidebarMenu>
-                {menuItems.map((item) => (
-                  <SidebarMenuItem key={item.label}>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger>
-                        <SidebarMenuButton>
-                          <item.icon className="w-4 h-4" />
-                          <span>{item.label}</span>
-                        </SidebarMenuButton>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent side="right" className="w-48">
-                        {item.subItems.map((subItem) => (
-                          <DropdownMenuItem key={subItem.label} asChild>
-                            <Link to={subItem.href}>{subItem.label}</Link>
-                          </DropdownMenuItem>
-                        ))}
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </SidebarMenuItem>
-                ))}
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
-        </SidebarContent>
-      </Sidebar>
-
-      <div className="flex-1 flex flex-col min-h-screen">
-        <header className="h-14 border-b border-border px-6 flex items-center justify-between">
-          <div className="flex items-center gap-4">
+    <SidebarProvider>
+      <div className="flex min-h-screen">
+        <Sidebar className="border-r border-border">
+          <div className="p-4 flex items-center gap-2">
             <SidebarTrigger>
-              <Menu className="h-5 w-5" />
+              <ChevronLeft className="h-4 w-4" />
             </SidebarTrigger>
+            <span className="font-semibold">la-sup</span>
           </div>
+          <SidebarContent>
+            <SidebarGroup>
+              <SidebarGroupLabel>Navigation</SidebarGroupLabel>
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  {menuItems.map((item) => (
+                    <SidebarMenuItem key={item.label}>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger>
+                          <SidebarMenuButton>
+                            <item.icon className="w-4 h-4" />
+                            <span>{item.label}</span>
+                          </SidebarMenuButton>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent side="right" className="w-48">
+                          {item.subItems.map((subItem) => (
+                            <DropdownMenuItem key={subItem.label} asChild>
+                              <Link to={subItem.href}>{subItem.label}</Link>
+                            </DropdownMenuItem>
+                          ))}
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </SidebarMenuItem>
+                  ))}
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+          </SidebarContent>
+        </Sidebar>
 
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="rounded-full">
-                <User className="w-5 h-5" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56">
-              <DropdownMenuLabel>My Account</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem>Settings</DropdownMenuItem>
-              <DropdownMenuItem>API Keys</DropdownMenuItem>
-              <DropdownMenuItem>IAM Management</DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem>Sign Out</DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </header>
+        <div className="flex-1 flex flex-col min-h-screen">
+          <header className="h-14 border-b border-border px-6 flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <SidebarTrigger>
+                <Menu className="h-5 w-5" />
+              </SidebarTrigger>
+            </div>
 
-        <main className="flex-1">
-          {children}
-        </main>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" className="rounded-full">
+                  <User className="w-5 h-5" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem>Settings</DropdownMenuItem>
+                <DropdownMenuItem>API Keys</DropdownMenuItem>
+                <DropdownMenuItem>IAM Management</DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem>Sign Out</DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </header>
+
+          <main className="flex-1">
+            {children}
+          </main>
+        </div>
       </div>
-    </>
+    </SidebarProvider>
   )
 }
 
