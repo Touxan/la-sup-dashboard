@@ -27,12 +27,12 @@ import {
 
 const menuItems = [
   {
-    label: "Infrastructure",
+    label: "Inventory",
     icon: Server,
     subItems: [
-      { label: "Servers", href: "#" },
-      { label: "Networks", href: "#" },
-      { label: "Storage", href: "#" },
+      { label: "Servers", href: "/inventory/servers" },
+      { label: "Networks", href: "/inventory/networks" },
+      { label: "Storage", href: "" },
       { label: "Load Balancers", href: "#" },
     ],
   },
@@ -62,7 +62,7 @@ const menuItems = [
     subItems: [
       { label: "Workflows", href: "/automation/workflows" },
       { label: "Executions", href: "/automation/executions" },
-      { label: "Schedules", href: "#" },
+      { label: "Cron", href: "/automation/cron" },
     ],
   },
 ]
