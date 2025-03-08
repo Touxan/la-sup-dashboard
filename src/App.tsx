@@ -10,6 +10,7 @@ import Workflows from "./pages/Workflows";
 import Executions from "./pages/Executions";
 import Inventory from "./pages/Inventory";
 import ServerDetail from "./pages/ServerDetail";
+import Certificates from "./pages/Certificates";
 
 const queryClient = new QueryClient();
 
@@ -25,6 +26,7 @@ const App = () => (
           <Route path="/automation/executions" element={<Executions />} />
           <Route path="/inventory/servers" element={<Inventory />} />
           <Route path="/inventory/servers/:id" element={<ServerDetail />} />
+          <Route path="/security/certificates" element={<Certificates />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
