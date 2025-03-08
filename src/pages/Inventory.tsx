@@ -1,5 +1,6 @@
 
 import React, { useState } from "react";
+import { Link } from "react-router-dom";
 import MainLayout from "@/components/MainLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -124,9 +125,11 @@ const Inventory = () => {
                       </Badge>
                     </TableCell>
                     <TableCell className="text-right">
-                      <Button variant="ghost" size="icon">
-                        <Info className="h-4 w-4" />
-                      </Button>
+                      <Link to={`/inventory/servers/${server.id}`}>
+                        <Button variant="ghost" size="icon">
+                          <Info className="h-4 w-4" />
+                        </Button>
+                      </Link>
                       <Button variant="ghost" size="icon">
                         <ExternalLink className="h-4 w-4" />
                       </Button>
