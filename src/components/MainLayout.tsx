@@ -41,17 +41,15 @@ const menuItems = [
       { label: "Metrics", href: "#" },
       { label: "Alerts", href: "#" },
       { label: "Logs", href: "#" },
-      { label: "Traces", href: "#" },
     ],
   },
   {
     label: "Security",
     icon: Shield,
     subItems: [
-      { label: "Access Control", href: "#" },
+      { label: "Event", href: "#" },
       { label: "Certificates", href: "#" },
       { label: "Firewall", href: "#" },
-      { label: "Compliance", href: "#" },
     ],
   },
   {
