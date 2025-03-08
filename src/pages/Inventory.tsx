@@ -105,7 +105,11 @@ const Inventory = () => {
               <TableBody>
                 {servers.map((server) => (
                   <TableRow key={server.id}>
-                    <TableCell className="font-medium">{server.name}</TableCell>
+                    <TableCell className="font-medium">
+                      <Link to={`/inventory/servers/${server.id}`} className="hover:underline text-blue-600">
+                        {server.name}
+                      </Link>
+                    </TableCell>
                     <TableCell>{server.ip}</TableCell>
                     <TableCell>{server.description}</TableCell>
                     <TableCell>
