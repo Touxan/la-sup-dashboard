@@ -11,6 +11,7 @@ import Executions from "./pages/Executions";
 import Inventory from "./pages/Inventory";
 import ServerDetail from "./pages/ServerDetail";
 import Certificates from "./pages/Certificates";
+import Alerts from "./pages/Alerts";
 
 const queryClient = new QueryClient();
 
@@ -27,6 +28,7 @@ const App = () => (
           <Route path="/inventory/servers" element={<Inventory />} />
           <Route path="/inventory/servers/:id" element={<ServerDetail />} />
           <Route path="/security/certificates" element={<Certificates />} />
+          <Route path="/monitoring/alerts" element={<Alerts />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

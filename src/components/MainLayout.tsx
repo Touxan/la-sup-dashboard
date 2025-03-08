@@ -1,5 +1,5 @@
 
-import { Menu, User, ChevronLeft, Server, Activity, Shield, Cog } from "lucide-react"
+import { Menu, User, ChevronLeft, Server, Activity, Shield, Cog, Bell } from "lucide-react"
 import { Link } from "react-router-dom"
 import { Button } from "@/components/ui/button"
 import {
@@ -39,7 +39,7 @@ const menuItems = [
     icon: Activity,
     subItems: [
       { label: "Metrics", href: "#" },
-      { label: "Alerts", href: "#" },
+      { label: "Alerts", href: "/monitoring/alerts" },
       { label: "Logs", href: "#" },
     ],
   },
