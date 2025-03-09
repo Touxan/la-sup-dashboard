@@ -124,7 +124,7 @@ const Alerts = () => {
   // Metric alert fields - Fix the operator initialization with a valid value
   const [newAlertMetricName, setNewAlertMetricName] = useState("");
   const [newAlertThreshold, setNewAlertThreshold] = useState(0);
-  const [newAlertOperator, setNewAlertOperator] = useState<">" | "<" | "==" | ">=" | "<=">">"); // Changed from "" to ">"
+  const [newAlertOperator, setNewAlertOperator] = useState<">" | "<" | "==" | ">=" | "<=">(">"); // Fixed syntax error by adding a space between > and ">"
   
   // Log alert fields
   const [newAlertPattern, setNewAlertPattern] = useState("");
