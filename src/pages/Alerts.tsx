@@ -121,10 +121,10 @@ const Alerts = () => {
   const [newAlertEvaluationPeriod, setNewAlertEvaluationPeriod] = useState(5);
   const [newAlertType, setNewAlertType] = useState<"metric" | "log">("metric");
   
-  // Metric alert fields
+  // Metric alert fields - Fix the operator initialization with a valid value
   const [newAlertMetricName, setNewAlertMetricName] = useState("");
   const [newAlertThreshold, setNewAlertThreshold] = useState(0);
-  const [newAlertOperator, setNewAlertOperator] = useState<">" | "<" | "==" | ">=" | "<=">("");
+  const [newAlertOperator, setNewAlertOperator] = useState<">" | "<" | "==" | ">=" | "<=">">"); // Changed from "" to ">"
   
   // Log alert fields
   const [newAlertPattern, setNewAlertPattern] = useState("");
