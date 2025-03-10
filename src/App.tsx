@@ -1,9 +1,9 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import Workflows from "./pages/Workflows";
@@ -15,6 +15,7 @@ import Certificates from "./pages/Certificates";
 import Alerts from "./pages/Alerts";
 import SecurityEvents from "./pages/SecurityEvents";
 import SecurityGroups from "./pages/SecurityGroups";
+import Settings from "./pages/Settings";
 
 const queryClient = new QueryClient();
 
@@ -35,7 +36,7 @@ const App = () => (
           <Route path="/security/events" element={<SecurityEvents />} />
           <Route path="/security/groups" element={<SecurityGroups />} />
           <Route path="/monitoring/alerts" element={<Alerts />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+          <Route path="/myaccount/settings" element={<Settings />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

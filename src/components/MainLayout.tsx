@@ -1,4 +1,3 @@
-
 import { Menu, User, ChevronLeft, Server, Activity, Shield, Cog, Bell } from "lucide-react"
 import { Link } from "react-router-dom"
 import { Button } from "@/components/ui/button"
@@ -121,7 +120,9 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
               <DropdownMenuContent align="end" className="w-56">
                 <DropdownMenuLabel>My Account</DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem>Settings</DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to="/myaccount/settings">Settings</Link>
+                </DropdownMenuItem>
                 <DropdownMenuItem>API Keys</DropdownMenuItem>
                 <DropdownMenuItem>IAM Management</DropdownMenuItem>
                 <DropdownMenuSeparator />
@@ -136,7 +137,7 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
         </div>
       </div>
     </SidebarProvider>
-  )
-}
+  );
+};
 
-export default MainLayout
+export default MainLayout;
