@@ -47,7 +47,7 @@ const menuItems = [
     label: "Security",
     icon: Shield,
     subItems: [
-      { label: "Event", href: "#" },
+      { label: "Events", href: "/security/events" },
       { label: "Certificates", href: "/security/certificates" },
       { label: "Firewall", href: "#" },
     ],
