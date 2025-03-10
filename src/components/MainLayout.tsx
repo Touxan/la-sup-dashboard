@@ -49,7 +49,7 @@ const menuItems = [
     subItems: [
       { label: "Events", href: "/security/events" },
       { label: "Certificates", href: "/security/certificates" },
-      { label: "Firewall", href: "#" },
+      { label: "Security Groups", href: "/security/groups" },
     ],
   },
   {

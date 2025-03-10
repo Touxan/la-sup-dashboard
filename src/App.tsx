@@ -13,6 +13,7 @@ import ServerDetail from "./pages/ServerDetail";
 import Certificates from "./pages/Certificates";
 import Alerts from "./pages/Alerts";
 import SecurityEvents from "./pages/SecurityEvents";
+import SecurityGroups from "./pages/SecurityGroups";
 
 const queryClient = new QueryClient();
 
@@ -30,6 +31,7 @@ const App = () => (
           <Route path="/inventory/servers/:id" element={<ServerDetail />} />
           <Route path="/security/certificates" element={<Certificates />} />
           <Route path="/security/events" element={<SecurityEvents />} />
+          <Route path="/security/groups" element={<SecurityGroups />} />
           <Route path="/monitoring/alerts" element={<Alerts />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
