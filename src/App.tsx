@@ -8,6 +8,7 @@ import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import Workflows from "./pages/Workflows";
 import Executions from "./pages/Executions";
+import Templates from "./pages/Templates";
 import Inventory from "./pages/Inventory";
 import ServerDetail from "./pages/ServerDetail";
 import Certificates from "./pages/Certificates";
@@ -27,6 +28,7 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/automation/workflows" element={<Workflows />} />
           <Route path="/automation/executions" element={<Executions />} />
+          <Route path="/automation/templates" element={<Templates />} />
           <Route path="/inventory/servers" element={<Inventory />} />
           <Route path="/inventory/servers/:id" element={<ServerDetail />} />
           <Route path="/security/certificates" element={<Certificates />} />
