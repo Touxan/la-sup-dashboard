@@ -19,9 +19,36 @@ import {
   X, 
   Plus, 
   Search, 
-  RefreshCw 
+  RefreshCw,
+  Shield,
+  Trash2
 } from "lucide-react";
 import { toast } from "sonner";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogFooter,
+  DialogClose,
+} from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface Container {
   id: string;
@@ -29,6 +56,24 @@ interface Container {
   status: "running" | "stopped" | "restarting";
   image: string;
   created: string;
+}
+
+// New interfaces for firewall rules and security groups
+interface FirewallRule {
+  id: string;
+  direction: "inbound" | "outbound";
+  port: string;
+  protocol: "tcp" | "udp" | "icmp";
+  source: string;
+  action: "allow" | "deny";
+  description: string;
+}
+
+interface SecurityGroup {
+  id: string;
+  name: string;
+  description: string;
+  rulesCount: number;
 }
 
 const ServerDetail = () => {
@@ -59,6 +104,34 @@ const ServerDetail = () => {
     { id: "6", name: "elastic", status: "running", image: "elasticsearch:8", created: "2023-05-17" },
     { id: "7", name: "kibana", status: "running", image: "kibana:8", created: "2023-05-17" },
   ]);
+
+  // Mock firewall rules data
+  const [firewallRules, setFirewallRules] = useState<FirewallRule[]>([
+    { id: "1", direction: "inbound", port: "22", protocol: "tcp", source: "0.0.0.0/0", action: "allow", description: "SSH access" },
+    { id: "2", direction: "inbound", port: "80", protocol: "tcp", source: "0.0.0.0/0", action: "allow", description: "HTTP access" },
+    { id: "3", direction: "inbound", port: "443", protocol: "tcp", source: "0.0.0.0/0", action: "allow", description: "HTTPS access" },
+    { id: "4", direction: "outbound", port: "All", protocol: "tcp", source: "0.0.0.0/0", action: "allow", description: "All outbound traffic" }
+  ]);
+
+  // Mock security groups data
+  const [securityGroups, setSecurityGroups] = useState<SecurityGroup[]>([
+    { id: "1", name: "web-server", description: "Standard web server security group", rulesCount: 5 },
+    { id: "2", name: "database", description: "Database server security group", rulesCount: 3 },
+    { id: "3", name: "internal-services", description: "Internal services security group", rulesCount: 8 }
+  ]);
+
+  // Server assigned security groups
+  const [assignedSecurityGroups, setAssignedSecurityGroups] = useState<string[]>(["1"]);
+
+  // New rule form states
+  const [newRule, setNewRule] = useState<Omit<FirewallRule, "id">>({
+    direction: "inbound",
+    port: "",
+    protocol: "tcp",
+    source: "",
+    action: "allow",
+    description: ""
+  });
 
   const handleSaveChanges = () => {
     setIsEditing(false);
@@ -91,6 +164,49 @@ const ServerDetail = () => {
   const handleRestartContainer = (containerId: string) => {
     toast.success(`Container ${containerId} restart initiated`);
     // Would call n8n API to restart container
+  };
+
+  const handleAddFirewallRule = () => {
+    if (!newRule.port || !newRule.source) {
+      toast.error("Please fill in all required fields");
+      return;
+    }
+
+    const rule: FirewallRule = {
+      id: Math.random().toString(36).substring(7),
+      ...newRule
+    };
+
+    setFirewallRules([...firewallRules, rule]);
+    
+    // Reset form
+    setNewRule({
+      direction: "inbound",
+      port: "",
+      protocol: "tcp",
+      source: "",
+      action: "allow",
+      description: ""
+    });
+
+    toast.success("Firewall rule added successfully");
+  };
+
+  const handleDeleteFirewallRule = (ruleId: string) => {
+    setFirewallRules(firewallRules.filter(rule => rule.id !== ruleId));
+    toast.success("Firewall rule deleted");
+  };
+
+  const handleAssignSecurityGroup = (groupId: string) => {
+    if (!assignedSecurityGroups.includes(groupId)) {
+      setAssignedSecurityGroups([...assignedSecurityGroups, groupId]);
+      toast.success("Security group assigned to server");
+    }
+  };
+
+  const handleRemoveSecurityGroup = (groupId: string) => {
+    setAssignedSecurityGroups(assignedSecurityGroups.filter(id => id !== groupId));
+    toast.success("Security group removed from server");
   };
 
   const filteredContainers = containers.filter(container => 
@@ -256,7 +372,9 @@ const ServerDetail = () => {
           <TabsList className="mb-4">
             <TabsTrigger value="metrics">System Metrics</TabsTrigger>
             <TabsTrigger value="containers">Containers</TabsTrigger>
+            <TabsTrigger value="firewall">Firewall</TabsTrigger>
           </TabsList>
+          
           <TabsContent value="metrics">
             <Card>
               <CardHeader>
@@ -308,6 +426,7 @@ const ServerDetail = () => {
               </CardContent>
             </Card>
           </TabsContent>
+          
           <TabsContent value="containers">
             <Card>
               <CardHeader className="pb-3">
@@ -382,6 +501,253 @@ const ServerDetail = () => {
                 )}
               </CardContent>
             </Card>
+          </TabsContent>
+          
+          <TabsContent value="firewall">
+            <div className="grid grid-cols-1 gap-6">
+              <Card>
+                <CardHeader className="pb-3">
+                  <div className="flex justify-between items-center">
+                    <CardTitle className="flex items-center">
+                      <Shield className="mr-2 h-5 w-5 text-blue-500" />
+                      Firewall Rules
+                    </CardTitle>
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <Button>
+                          <Plus className="mr-2 h-4 w-4" />
+                          Add Rule
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent className="sm:max-w-[550px]">
+                        <DialogHeader>
+                          <DialogTitle>Add Firewall Rule</DialogTitle>
+                          <DialogDescription>
+                            Configure a new firewall rule for this server.
+                          </DialogDescription>
+                        </DialogHeader>
+                        
+                        <div className="grid gap-4 py-4">
+                          <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                              <Label htmlFor="direction">Direction</Label>
+                              <Select
+                                value={newRule.direction}
+                                onValueChange={(value: "inbound" | "outbound") => 
+                                  setNewRule({...newRule, direction: value})
+                                }
+                              >
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Select direction" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="inbound">Inbound</SelectItem>
+                                  <SelectItem value="outbound">Outbound</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            <div className="space-y-2">
+                              <Label htmlFor="protocol">Protocol</Label>
+                              <Select
+                                value={newRule.protocol}
+                                onValueChange={(value: "tcp" | "udp" | "icmp") => 
+                                  setNewRule({...newRule, protocol: value})
+                                }
+                              >
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Select protocol" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="tcp">TCP</SelectItem>
+                                  <SelectItem value="udp">UDP</SelectItem>
+                                  <SelectItem value="icmp">ICMP</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                          </div>
+                          
+                          <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                              <Label htmlFor="port">Port</Label>
+                              <Input
+                                id="port"
+                                placeholder="80, 443, or range (e.g. 3000-4000)"
+                                value={newRule.port}
+                                onChange={(e) => setNewRule({...newRule, port: e.target.value})}
+                              />
+                            </div>
+                            <div className="space-y-2">
+                              <Label htmlFor="source">Source/Destination</Label>
+                              <Input
+                                id="source"
+                                placeholder="IP or CIDR (e.g. 10.0.0.0/24)"
+                                value={newRule.source}
+                                onChange={(e) => setNewRule({...newRule, source: e.target.value})}
+                              />
+                            </div>
+                          </div>
+                          
+                          <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                              <Label htmlFor="action">Action</Label>
+                              <Select
+                                value={newRule.action}
+                                onValueChange={(value: "allow" | "deny") => 
+                                  setNewRule({...newRule, action: value})
+                                }
+                              >
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Select action" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="allow">Allow</SelectItem>
+                                  <SelectItem value="deny">Deny</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            <div className="space-y-2">
+                              <Label htmlFor="description">Description</Label>
+                              <Input
+                                id="description"
+                                placeholder="HTTP traffic"
+                                value={newRule.description}
+                                onChange={(e) => setNewRule({...newRule, description: e.target.value})}
+                              />
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <DialogFooter>
+                          <DialogClose asChild>
+                            <Button variant="outline">Cancel</Button>
+                          </DialogClose>
+                          <Button onClick={handleAddFirewallRule}>Add Rule</Button>
+                        </DialogFooter>
+                      </DialogContent>
+                    </Dialog>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Direction</TableHead>
+                        <TableHead>Protocol</TableHead>
+                        <TableHead>Ports</TableHead>
+                        <TableHead>Source/Destination</TableHead>
+                        <TableHead>Action</TableHead>
+                        <TableHead>Description</TableHead>
+                        <TableHead className="text-right">Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {firewallRules.map((rule) => (
+                        <TableRow key={rule.id}>
+                          <TableCell>
+                            <Badge variant="outline">
+                              {rule.direction === "inbound" ? "Inbound" : "Outbound"}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>{rule.protocol.toUpperCase()}</TableCell>
+                          <TableCell>{rule.port}</TableCell>
+                          <TableCell>{rule.source}</TableCell>
+                          <TableCell>
+                            <Badge variant={rule.action === "allow" ? "default" : "destructive"}>
+                              {rule.action}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>{rule.description}</TableCell>
+                          <TableCell className="text-right">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => handleDeleteFirewallRule(rule.id)}
+                            >
+                              <Trash2 className="h-4 w-4 text-red-500" />
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </CardContent>
+              </Card>
+              
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <Shield className="mr-2 h-5 w-5 text-green-500" />
+                    Security Groups
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-6">
+                    <div>
+                      <h3 className="text-md font-medium mb-2">Assigned Security Groups</h3>
+                      {assignedSecurityGroups.length > 0 ? (
+                        <div className="space-y-4">
+                          {securityGroups
+                            .filter(group => assignedSecurityGroups.includes(group.id))
+                            .map(group => (
+                              <div key={group.id} className="flex justify-between items-center border p-3 rounded-md">
+                                <div>
+                                  <div className="font-medium">{group.name}</div>
+                                  <div className="text-sm text-muted-foreground">{group.description}</div>
+                                  <div className="text-xs mt-1">
+                                    <Badge variant="outline" className="mr-2">
+                                      {group.rulesCount} rules
+                                    </Badge>
+                                  </div>
+                                </div>
+                                <Button 
+                                  variant="ghost" 
+                                  size="sm"
+                                  onClick={() => handleRemoveSecurityGroup(group.id)}
+                                >
+                                  <X className="h-4 w-4 text-red-500" />
+                                </Button>
+                              </div>
+                            ))
+                          }
+                        </div>
+                      ) : (
+                        <div className="text-muted-foreground italic">No security groups assigned</div>
+                      )}
+                    </div>
+                    
+                    <div>
+                      <h3 className="text-md font-medium mb-2">Available Security Groups</h3>
+                      <div className="space-y-4">
+                        {securityGroups
+                          .filter(group => !assignedSecurityGroups.includes(group.id))
+                          .map(group => (
+                            <div key={group.id} className="flex justify-between items-center border p-3 rounded-md">
+                              <div>
+                                <div className="font-medium">{group.name}</div>
+                                <div className="text-sm text-muted-foreground">{group.description}</div>
+                                <div className="text-xs mt-1">
+                                  <Badge variant="outline" className="mr-2">
+                                    {group.rulesCount} rules
+                                  </Badge>
+                                </div>
+                              </div>
+                              <Button 
+                                variant="outline" 
+                                size="sm"
+                                onClick={() => handleAssignSecurityGroup(group.id)}
+                              >
+                                <Plus className="h-4 w-4 mr-1" />
+                                Assign
+                              </Button>
+                            </div>
+                          ))
+                        }
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
           </TabsContent>
         </Tabs>
       </div>
