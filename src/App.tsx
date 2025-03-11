@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -16,6 +17,7 @@ import Alerts from "./pages/Alerts";
 import SecurityEvents from "./pages/SecurityEvents";
 import SecurityGroups from "./pages/SecurityGroups";
 import Settings from "./pages/Settings";
+import ApiKeys from "./pages/ApiKeys";
 
 const queryClient = new QueryClient();
 
@@ -37,6 +39,7 @@ const App = () => (
           <Route path="/security/groups" element={<SecurityGroups />} />
           <Route path="/monitoring/alerts" element={<Alerts />} />
           <Route path="/myaccount/settings" element={<Settings />} />
+          <Route path="/myaccount/api-keys" element={<ApiKeys />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

@@ -1,3 +1,4 @@
+
 import { Menu, User, ChevronLeft, Server, Activity, Shield, Cog, Bell } from "lucide-react"
 import { Link } from "react-router-dom"
 import { Button } from "@/components/ui/button"
@@ -123,7 +124,9 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
                 <DropdownMenuItem asChild>
                   <Link to="/myaccount/settings">Settings</Link>
                 </DropdownMenuItem>
-                <DropdownMenuItem>API Keys</DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to="/myaccount/api-keys">API Keys</Link>
+                </DropdownMenuItem>
                 <DropdownMenuItem>IAM Management</DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem>Sign Out</DropdownMenuItem>
