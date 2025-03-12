@@ -1,69 +1,95 @@
-# Welcome to your Lovable project
 
-## Project info
+# La-Sup Cloud Infrastructure Management Platform
 
-**URL**: https://lovable.dev/projects/fb513aab-0a14-438c-b287-4d89b35091bb
+La-Sup is a powerful, AI-driven cloud infrastructure management platform that simplifies the way organizations handle their multi-cloud environments through automation, monitoring, and security.
 
-## How can I edit this code?
+## Overview
 
-There are several ways of editing your application.
+La-Sup integrates best-in-class open-source tools to provide a comprehensive solution for:
+- Multi-cloud infrastructure management
+- Automated workflows and operations
+- Infrastructure monitoring and logging
+- Security and compliance
 
-**Use Lovable**
+## Key Features
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/fb513aab-0a14-438c-b287-4d89b35091bb) and start prompting.
+### 🤖 Automation
+- Workflow automation powered by n8n
+- AI-assisted operations and decision making
+- Infrastructure provisioning and management
+- Custom webhook and form-based triggers
 
-Changes made via Lovable will be committed automatically to this repo.
+### 📊 Monitoring & Observability
+- Real-time metrics visualization with Grafana
+- Centralized logging with Loki
+- Infrastructure and application metrics with Prometheus
+- Custom dashboards and alerts
 
-**Use your preferred IDE**
+### 🔒 Security
+- Infrastructure security scanning
+- Certificate management
+- Security groups management
+- Access control and permissions
+- Integration with Falco Security for threat detection
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+### 🎯 Key Benefits
+- Simplified infrastructure management
+- Reduced operational overhead
+- Enhanced security posture
+- Better visibility into infrastructure health
+- Automated compliance checks
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+## Architecture
 
-Follow these steps:
+La-Sup integrates with several key technologies:
+- **n8n**: For workflow automation and integrations
+- **Prometheus**: For metrics collection and monitoring
+- **Loki**: For log aggregation and analysis
+- **Grafana**: For metrics visualization
+- **Falco Security**: For security monitoring and threat detection
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+## Getting Started
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+1. Configure your data sources in Settings:
+   - Set up Grafana URL
+   - Configure Loki endpoint
+   - Set n8n instance URL
+   - Configure Prometheus endpoint
 
-# Step 3: Install the necessary dependencies.
-npm i
+2. Set up your cloud provider credentials
+3. Start managing your infrastructure
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
-```
+## Features
 
-**Edit a file directly in GitHub**
+### Infrastructure Management
+- Server inventory
+- Network management
+- Storage management
+- Load balancer configuration
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+### Automation
+- Customizable workflows
+- Webhook triggers
+- Form-based automation
+- Execution history
 
-**Use GitHub Codespaces**
+### Security
+- Security event monitoring
+- Certificate management
+- Security group configuration
+- Access control
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+### Monitoring
+- Real-time metrics
+- Log aggregation
+- Custom alerts
+- Performance monitoring
 
-## What technologies are used for this project?
+## License
 
-This project is built with .
+This project is licensed under the MIT License - see the LICENSE file for details.
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+## Support
 
-## How can I deploy this project?
+For support, feature requests, or bug reports, please open an issue in the repository.
 
-Simply open [Lovable](https://lovable.dev/projects/fb513aab-0a14-438c-b287-4d89b35091bb) and click on Share -> Publish.
-
-## I want to use a custom domain - is that possible?
-
-We don't support custom domains (yet). If you want to deploy your project under your own domain then we recommend using Netlify. Visit our docs for more details: [Custom domains](https://docs.lovable.dev/tips-tricks/custom-domain/)
