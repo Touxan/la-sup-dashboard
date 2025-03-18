@@ -32,6 +32,7 @@ const Auth = () => {
       toast.success("Signed in successfully");
       navigate("/");
     } catch (error: any) {
+      console.error("Sign in error:", error);
       toast.error(error.message || "Error signing in");
     } finally {
       setLoading(false);
@@ -42,8 +43,14 @@ const Auth = () => {
     e.preventDefault();
     setLoading(true);
     
+    if (!validatePassword(password)) {
+      toast.error("Password must be at least 6 characters");
+      setLoading(false);
+      return;
+    }
+    
     try {
-      const { error } = await supabase.auth.signUp({
+      const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
@@ -57,13 +64,21 @@ const Auth = () => {
         throw error;
       }
       
-      toast.success("Account created successfully. Please sign in.");
-      navigate("/auth");
+      if (data?.user?.identities?.length === 0) {
+        toast.error("This email is already registered. Please sign in instead.");
+      } else {
+        toast.success("Account created successfully. Please check your email for verification if required.");
+      }
     } catch (error: any) {
+      console.error("Sign up error:", error);
       toast.error(error.message || "Error creating account");
     } finally {
       setLoading(false);
     }
+  };
+
+  const validatePassword = (password: string): boolean => {
+    return password.length >= 6;
   };
 
   return (
