@@ -18,6 +18,7 @@ const Auth = () => {
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log("Starting sign in process");
     setLoading(true);
     
     try {
@@ -30,18 +31,19 @@ const Auth = () => {
         throw error;
       }
       
+      console.log("Sign in successful, navigating to home");
       toast.success("Signed in successfully");
       navigate("/");
     } catch (error: any) {
       console.error("Sign in error:", error);
       
-      // Gestion des erreurs spécifiques
+      // Specific error handling
       if (error.message.includes("Invalid login credentials")) {
-        toast.error("Email ou mot de passe incorrect");
+        toast.error("Invalid email or password");
       } else if (error.message.includes("Email not confirmed")) {
-        toast.error("Veuillez confirmer votre email avant de vous connecter");
+        toast.error("Please confirm your email before signing in");
       } else {
-        toast.error(error.message || "Erreur lors de la connexion");
+        toast.error(error.message || "Error signing in");
       }
     } finally {
       setLoading(false);
@@ -50,15 +52,17 @@ const Auth = () => {
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log("Starting sign up process");
     setLoading(true);
     
-    if (!validatePassword(password)) {
-      toast.error("Le mot de passe doit contenir au moins 6 caractères");
+    if (password.length < 6) {
+      toast.error("Password must be at least 6 characters");
       setLoading(false);
       return;
     }
     
     try {
+      console.log("Attempting to sign up with:", { email, password });
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -66,39 +70,45 @@ const Auth = () => {
           data: {
             full_name: email.split('@')[0],
           },
-          emailRedirectTo: window.location.origin + '/auth',
         },
       });
       
       if (error) {
+        console.error("Supabase signup error:", error);
         throw error;
       }
       
       console.log("Sign up response:", data);
       
       if (data?.user?.identities?.length === 0) {
-        toast.error("Cet email est déjà enregistré. Veuillez vous connecter.");
+        toast.error("This email is already registered. Please sign in.");
         setActiveTab("login");
       } else {
-        toast.success("Compte créé avec succès. Vérifiez votre email pour confirmer l'inscription si nécessaire.");
+        toast.success("Account created successfully.");
+        // Check if email confirmation is required
+        if (data?.user?.confirmed_at === null) {
+          toast.info("Please check your email for confirmation.");
+        } else {
+          // If no email confirmation required, navigate to home
+          navigate("/");
+        }
       }
     } catch (error: any) {
       console.error("Sign up error:", error);
       
-      // Gestion des erreurs spécifiques
+      // Specific error handling
       if (error.message.includes("already registered")) {
-        toast.error("Cet email est déjà enregistré");
+        toast.error("This email is already registered");
         setActiveTab("login");
+      } else if (error.message.includes("Database error saving new user")) {
+        toast.error("Server error during registration. Please try again later.");
+        console.error("Database error details:", error);
       } else {
-        toast.error(error.message || "Erreur lors de la création du compte");
+        toast.error(error.message || "Error creating account");
       }
     } finally {
       setLoading(false);
     }
-  };
-
-  const validatePassword = (password: string): boolean => {
-    return password.length >= 6;
   };
 
   return (
@@ -113,8 +123,8 @@ const Auth = () => {
         <CardContent>
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <TabsList className="grid w-full grid-cols-2 mb-6">
-              <TabsTrigger value="login">Connexion</TabsTrigger>
-              <TabsTrigger value="register">Inscription</TabsTrigger>
+              <TabsTrigger value="login">Sign In</TabsTrigger>
+              <TabsTrigger value="register">Sign Up</TabsTrigger>
             </TabsList>
             <TabsContent value="login">
               <form onSubmit={handleSignIn} className="space-y-4">
@@ -125,13 +135,13 @@ const Auth = () => {
                     type="email" 
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder="votre@email.com"
+                    placeholder="your@email.com"
                     required
                   />
                 </div>
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <Label htmlFor="password">Mot de passe</Label>
+                    <Label htmlFor="password">Password</Label>
                   </div>
                   <Input 
                     id="password" 
@@ -142,7 +152,7 @@ const Auth = () => {
                   />
                 </div>
                 <Button type="submit" className="w-full" disabled={loading}>
-                  {loading ? "Connexion en cours..." : "Se connecter"}
+                  {loading ? "Signing in..." : "Sign In"}
                 </Button>
               </form>
             </TabsContent>
@@ -155,26 +165,26 @@ const Auth = () => {
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder="votre@email.com"
+                    placeholder="your@email.com"
                     required
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="password">Mot de passe</Label>
+                  <Label htmlFor="password">Password</Label>
                   <Input 
                     id="password" 
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Créer un mot de passe"
+                    placeholder="Create a password"
                     required
                   />
                   <p className="text-xs text-muted-foreground">
-                    Le mot de passe doit contenir au moins 6 caractères
+                    Password must be at least 6 characters
                   </p>
                 </div>
                 <Button type="submit" className="w-full" disabled={loading}>
-                  {loading ? "Création du compte..." : "Créer un compte"}
+                  {loading ? "Creating account..." : "Create account"}
                 </Button>
               </form>
             </TabsContent>
