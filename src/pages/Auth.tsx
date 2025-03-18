@@ -14,6 +14,7 @@ const Auth = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [activeTab, setActiveTab] = useState("login");
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -33,7 +34,15 @@ const Auth = () => {
       navigate("/");
     } catch (error: any) {
       console.error("Sign in error:", error);
-      toast.error(error.message || "Error signing in");
+      
+      // Gestion des erreurs spécifiques
+      if (error.message.includes("Invalid login credentials")) {
+        toast.error("Email ou mot de passe incorrect");
+      } else if (error.message.includes("Email not confirmed")) {
+        toast.error("Veuillez confirmer votre email avant de vous connecter");
+      } else {
+        toast.error(error.message || "Erreur lors de la connexion");
+      }
     } finally {
       setLoading(false);
     }
@@ -44,7 +53,7 @@ const Auth = () => {
     setLoading(true);
     
     if (!validatePassword(password)) {
-      toast.error("Password must be at least 6 characters");
+      toast.error("Le mot de passe doit contenir au moins 6 caractères");
       setLoading(false);
       return;
     }
@@ -57,6 +66,7 @@ const Auth = () => {
           data: {
             full_name: email.split('@')[0],
           },
+          emailRedirectTo: window.location.origin + '/auth',
         },
       });
       
@@ -64,14 +74,24 @@ const Auth = () => {
         throw error;
       }
       
+      console.log("Sign up response:", data);
+      
       if (data?.user?.identities?.length === 0) {
-        toast.error("This email is already registered. Please sign in instead.");
+        toast.error("Cet email est déjà enregistré. Veuillez vous connecter.");
+        setActiveTab("login");
       } else {
-        toast.success("Account created successfully. Please check your email for verification if required.");
+        toast.success("Compte créé avec succès. Vérifiez votre email pour confirmer l'inscription si nécessaire.");
       }
     } catch (error: any) {
       console.error("Sign up error:", error);
-      toast.error(error.message || "Error creating account");
+      
+      // Gestion des erreurs spécifiques
+      if (error.message.includes("already registered")) {
+        toast.error("Cet email est déjà enregistré");
+        setActiveTab("login");
+      } else {
+        toast.error(error.message || "Erreur lors de la création du compte");
+      }
     } finally {
       setLoading(false);
     }
@@ -91,10 +111,10 @@ const Auth = () => {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Tabs defaultValue="login" className="w-full">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <TabsList className="grid w-full grid-cols-2 mb-6">
-              <TabsTrigger value="login">Login</TabsTrigger>
-              <TabsTrigger value="register">Register</TabsTrigger>
+              <TabsTrigger value="login">Connexion</TabsTrigger>
+              <TabsTrigger value="register">Inscription</TabsTrigger>
             </TabsList>
             <TabsContent value="login">
               <form onSubmit={handleSignIn} className="space-y-4">
@@ -105,13 +125,13 @@ const Auth = () => {
                     type="email" 
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder="your@email.com"
+                    placeholder="votre@email.com"
                     required
                   />
                 </div>
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <Label htmlFor="password">Password</Label>
+                    <Label htmlFor="password">Mot de passe</Label>
                   </div>
                   <Input 
                     id="password" 
@@ -122,7 +142,7 @@ const Auth = () => {
                   />
                 </div>
                 <Button type="submit" className="w-full" disabled={loading}>
-                  {loading ? "Signing in..." : "Sign In"}
+                  {loading ? "Connexion en cours..." : "Se connecter"}
                 </Button>
               </form>
             </TabsContent>
@@ -135,26 +155,26 @@ const Auth = () => {
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder="your@email.com"
+                    placeholder="votre@email.com"
                     required
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="password">Password</Label>
+                  <Label htmlFor="password">Mot de passe</Label>
                   <Input 
                     id="password" 
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Create a password"
+                    placeholder="Créer un mot de passe"
                     required
                   />
                   <p className="text-xs text-muted-foreground">
-                    Password must be at least 6 characters
+                    Le mot de passe doit contenir au moins 6 caractères
                   </p>
                 </div>
                 <Button type="submit" className="w-full" disabled={loading}>
-                  {loading ? "Creating account..." : "Create Account"}
+                  {loading ? "Création du compte..." : "Créer un compte"}
                 </Button>
               </form>
             </TabsContent>
