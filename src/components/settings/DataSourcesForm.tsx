@@ -70,12 +70,16 @@ export function DataSourcesForm() {
         url,
       }));
       
-      const { error } = await supabase
-        .rpc('upsert_data_sources', {
-          _sources: updates
-        });
+      // Use a simple update function since the Supabase RPC function is not available in types
+      for (const update of updates) {
+        const { error } = await supabase
+          .from('data_sources')
+          .update({ url: update.url, updated_at: new Date().toISOString() })
+          .eq('name', update.name);
+          
+        if (error) throw error;
+      }
       
-      if (error) throw error;
       return values;
     },
     onSuccess: () => {
@@ -87,16 +91,8 @@ export function DataSourcesForm() {
     }
   });
 
-  // Create a stored procedure for upsert operation
-  useEffect(() => {
-    const createProcedure = async () => {
-      await supabase.rpc('create_upsert_procedure', {}).catch(() => {
-        // Procedure might already exist, we can ignore this error
-      });
-    };
-    
-    createProcedure();
-  }, []);
+  // Create a stored procedure for upsert operation - removed this since it's causing type errors
+  // and we'll handle the updates directly in the mutation above
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     updateDataSources.mutate(values);
