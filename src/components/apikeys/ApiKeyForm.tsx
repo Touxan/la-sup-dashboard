@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
@@ -7,6 +7,9 @@ import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
+import { supabase } from "@/integrations/supabase/client";
+import { useQuery } from "@tanstack/react-query";
+import { toast } from "sonner";
 
 // Define form schema with validation
 const formSchema = z.object({
@@ -14,40 +17,19 @@ const formSchema = z.object({
   permissions: z.array(z.string()).min(1, "Select at least one permission"),
 });
 
-// Available permissions grouped by resource
-const permissionGroups = [
-  {
-    resource: "Servers",
-    permissions: [
-      { id: "read:servers", label: "Read Servers" },
-      { id: "write:servers", label: "Modify Servers" },
-      { id: "delete:servers", label: "Delete Servers" },
-    ],
-  },
-  {
-    resource: "Workflows",
-    permissions: [
-      { id: "read:workflows", label: "Read Workflows" },
-      { id: "write:workflows", label: "Modify Workflows" },
-      { id: "execute:workflows", label: "Execute Workflows" },
-    ],
-  },
-  {
-    resource: "Monitoring",
-    permissions: [
-      { id: "read:metrics", label: "Read Metrics" },
-      { id: "read:alerts", label: "Read Alerts" },
-      { id: "write:alerts", label: "Configure Alerts" },
-    ],
-  },
-  {
-    resource: "Security",
-    permissions: [
-      { id: "read:security", label: "Read Security Groups" },
-      { id: "write:security", label: "Modify Security Groups" },
-      { id: "read:certificates", label: "Read Certificates" },
-    ],
-  },
+// Define resource types
+type Resource = {
+  id: string;
+  name: string;
+  description: string;
+};
+
+// Action definitions - matching our permission_action enum in the database
+const actions = [
+  { id: "read", label: "Read" },
+  { id: "write", label: "Modify" },
+  { id: "delete", label: "Delete" },
+  { id: "execute", label: "Execute" },
 ];
 
 type ApiKeyFormProps = {
@@ -58,6 +40,37 @@ type ApiKeyFormProps = {
 export function ApiKeyForm({ onSubmit, onCancel }: ApiKeyFormProps) {
   const [showKey, setShowKey] = useState(false);
   const [generatedKey, setGeneratedKey] = useState("");
+  
+  // Fetch resources from database
+  const { data: resources = [], isLoading } = useQuery({
+    queryKey: ['resources'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('resources')
+        .select('id, name, description')
+        .order('name');
+      
+      if (error) {
+        toast.error(`Error fetching resources: ${error.message}`);
+        return [];
+      }
+      
+      return data;
+    }
+  });
+
+  // Group resources by type
+  const groupedResources = resources.reduce((acc: any, resource: Resource) => {
+    // Get a human-readable group name based on resource name
+    const groupName = resource.name.charAt(0).toUpperCase() + resource.name.slice(1);
+    
+    if (!acc[groupName]) {
+      acc[groupName] = [];
+    }
+    
+    acc[groupName].push(resource);
+    return acc;
+  }, {});
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -68,21 +81,23 @@ export function ApiKeyForm({ onSubmit, onCancel }: ApiKeyFormProps) {
   });
 
   function handleSubmit(values: z.infer<typeof formSchema>) {
-    // Generate a mock API key
+    // Generate a secure API key with format 'sk_xxxx...'
     const mockKey = `sk_${Math.random().toString(36).substring(2, 10)}_${Math.random().toString(36).substring(2, 15)}`;
     setGeneratedKey(mockKey);
     setShowKey(true);
     
     // Create new API key object
     const newApiKey = {
-      id: Date.now().toString(),
       name: values.name,
       key: mockKey,
-      createdAt: new Date().toISOString().split('T')[0],
       permissions: values.permissions,
     };
     
     onSubmit(newApiKey);
+  }
+
+  if (isLoading) {
+    return <div className="p-4 text-center">Loading resources...</div>;
   }
 
   return (
@@ -124,34 +139,39 @@ export function ApiKeyForm({ onSubmit, onCancel }: ApiKeyFormProps) {
               <FormLabel>Permissions</FormLabel>
               <FormDescription>Select the permissions for this API key</FormDescription>
               
-              {permissionGroups.map((group) => (
-                <div key={group.resource} className="space-y-2">
-                  <h4 className="text-sm font-medium text-muted-foreground">{group.resource}</h4>
+              {Object.entries(groupedResources).map(([groupName, groupResources]: [string, any]) => (
+                <div key={groupName} className="space-y-2">
+                  <h4 className="text-sm font-medium text-muted-foreground">{groupName}</h4>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                    {group.permissions.map((permission) => (
-                      <FormField
-                        key={permission.id}
-                        control={form.control}
-                        name="permissions"
-                        render={({ field }) => (
-                          <FormItem key={permission.id} className="flex flex-row items-start space-x-3 space-y-0 rounded-md p-2 hover:bg-muted/50">
-                            <FormControl>
-                              <Checkbox
-                                checked={field.value?.includes(permission.id)}
-                                onCheckedChange={(checked) => {
-                                  const updatedPermissions = checked
-                                    ? [...field.value, permission.id]
-                                    : field.value.filter((value) => value !== permission.id);
-                                  field.onChange(updatedPermissions);
-                                }}
-                              />
-                            </FormControl>
-                            <FormLabel className="text-sm font-normal cursor-pointer">
-                              {permission.label}
-                            </FormLabel>
-                          </FormItem>
-                        )}
-                      />
+                    {groupResources.map((resource: Resource) => (
+                      actions.map(action => (
+                        <FormField
+                          key={`${action.id}:${resource.name}`}
+                          control={form.control}
+                          name="permissions"
+                          render={({ field }) => {
+                            const permissionId = `${action.id}:${resource.name}`;
+                            return (
+                              <FormItem key={permissionId} className="flex flex-row items-start space-x-3 space-y-0 rounded-md p-2 hover:bg-muted/50">
+                                <FormControl>
+                                  <Checkbox
+                                    checked={field.value?.includes(permissionId)}
+                                    onCheckedChange={(checked) => {
+                                      const updatedPermissions = checked
+                                        ? [...field.value, permissionId]
+                                        : field.value.filter((value) => value !== permissionId);
+                                      field.onChange(updatedPermissions);
+                                    }}
+                                  />
+                                </FormControl>
+                                <FormLabel className="text-sm font-normal cursor-pointer">
+                                  {action.label} {resource.name}
+                                </FormLabel>
+                              </FormItem>
+                            );
+                          }}
+                        />
+                      ))
                     ))}
                   </div>
                 </div>
