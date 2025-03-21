@@ -1,7 +1,9 @@
 
-import { Menu, User, ChevronLeft, Server, Activity, Shield, Cog, Bell } from "lucide-react"
-import { Link } from "react-router-dom"
+import { Menu, User, ChevronLeft, Server, Activity, Shield, Cog, Bell, LogOut } from "lucide-react"
+import { Link, useNavigate } from "react-router-dom"
 import { Button } from "@/components/ui/button"
+import { useAuth } from "@/contexts/AuthContext"
+import { toast } from "sonner"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -64,6 +66,19 @@ const menuItems = [
 ]
 
 const MainLayout = ({ children }: { children: React.ReactNode }) => {
+  const { signOut, user } = useAuth();
+  const navigate = useNavigate();
+  
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+      toast.success("Signed out successfully");
+      navigate("/auth");
+    } catch (error) {
+      toast.error("Error signing out");
+    }
+  };
+
   return (
     <SidebarProvider defaultOpen={true}>
       <div className="flex min-h-screen w-full">
@@ -119,13 +134,20 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56">
-                <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                <DropdownMenuLabel>{user?.email || 'My Account'}</DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem>Settings</DropdownMenuItem>
-                <DropdownMenuItem>API Keys</DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to="/myaccount/settings">Settings</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to="/myaccount/api-keys">API Keys</Link>
+                </DropdownMenuItem>
                 <DropdownMenuItem>IAM Management</DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem>Sign Out</DropdownMenuItem>
+                <DropdownMenuItem onClick={handleSignOut}>
+                  <LogOut className="mr-2 h-4 w-4" />
+                  Sign Out
+                </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </header>
@@ -136,7 +158,7 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
         </div>
       </div>
     </SidebarProvider>
-  )
-}
+  );
+};
 
-export default MainLayout
+export default MainLayout;
