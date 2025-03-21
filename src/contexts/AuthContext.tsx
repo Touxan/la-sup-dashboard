@@ -29,22 +29,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
-        console.log("Auth state changed:", _event, session ? "Session exists" : "No session");
+      (event, session) => {
+        console.log("Auth state changed:", event, session ? "Session exists" : "No session");
         setSession(session);
         setUser(session?.user ?? null);
         setLoading(false);
         
-        if (_event === 'SIGNED_IN') {
+        if (event === 'SIGNED_IN') {
           console.log("User signed in:", session?.user?.email);
+          console.log("User details:", session?.user);
           toast.success("Successfully signed in");
-        } else if (_event === 'SIGNED_OUT') {
+        } else if (event === 'SIGNED_OUT') {
           console.log("User signed out");
           toast.info("Signed out");
-        } else if (_event === 'USER_UPDATED') {
-          console.log("User updated");
-        } else if (_event === 'PASSWORD_RECOVERY') {
+        } else if (event === 'USER_UPDATED') {
+          console.log("User updated:", session?.user);
+        } else if (event === 'PASSWORD_RECOVERY') {
           console.log("Password recovery event");
+        } else if (event === 'TOKEN_REFRESHED') {
+          console.log("Token refreshed");
+        } else {
+          console.log("Other auth event:", event);
         }
       }
     );

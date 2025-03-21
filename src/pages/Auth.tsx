@@ -62,7 +62,7 @@ const Auth = () => {
     }
     
     try {
-      console.log("Attempting to sign up with:", { email, password });
+      console.log("Attempting to sign up with:", { email });
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -83,15 +83,21 @@ const Auth = () => {
       if (data?.user?.identities?.length === 0) {
         toast.error("This email is already registered. Please sign in.");
         setActiveTab("login");
-      } else {
-        toast.success("Account created successfully.");
+      } else if (data?.user) {
+        toast.success("Account created successfully");
+        
         // Check if email confirmation is required
-        if (data?.user?.confirmed_at === null) {
-          toast.info("Please check your email for confirmation.");
-        } else {
-          // If no email confirmation required, navigate to home
+        if (data.session) {
+          // User is automatically signed in (no email confirmation required)
+          console.log("User session created, navigating to home");
           navigate("/");
+        } else {
+          // Email confirmation required
+          toast.info("Please check your email for confirmation");
         }
+      } else {
+        console.error("Unexpected response format:", data);
+        toast.error("Unexpected error during sign up");
       }
     } catch (error: any) {
       console.error("Sign up error:", error);
