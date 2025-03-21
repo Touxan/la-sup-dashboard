@@ -67,12 +67,16 @@ const chartConfigs = {
   disk: {
     title: "Disk Usage",
     data: generateDiskData(),
+    dataKey: "used", // Add missing dataKey property
     yAxisLabel: "%",
+    color: "#ef4444", // Add missing color property
   },
   network: {
     title: "Network Traffic",
     data: generateNetworkData(),
+    dataKey: "inbound", // Add missing dataKey property
     yAxisLabel: "MB/s",
+    color: "#60a5fa", // Add missing color property
   },
   "container-cpu": {
     title: "Container CPU Usage",
