@@ -1,4 +1,3 @@
-
 import { Menu, User, ChevronLeft, Server, Activity, Shield, Cog, Bell, LogOut } from "lucide-react"
 import { Link, useNavigate } from "react-router-dom"
 import { Button } from "@/components/ui/button"
@@ -87,7 +86,9 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
             <SidebarTrigger>
               <ChevronLeft className="h-4 w-4" />
             </SidebarTrigger>
-            <span className="font-semibold">la-sup</span>
+            <Link to="/" className="font-semibold hover:text-primary transition-colors">
+              la-sup
+            </Link>
           </div>
           <SidebarContent>
             <SidebarGroup>
