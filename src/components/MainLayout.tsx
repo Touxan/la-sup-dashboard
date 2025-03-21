@@ -1,3 +1,4 @@
+
 import { Menu, User, ChevronLeft, Server, Activity, Shield, Cog, Bell, LogOut } from "lucide-react"
 import { Link, useNavigate } from "react-router-dom"
 import { Button } from "@/components/ui/button"
@@ -23,6 +24,7 @@ import {
   SidebarMenuItem,
   SidebarProvider,
 } from "@/components/ui/sidebar"
+import ChatBot from "@/components/ChatBot"
 
 const menuItems = [
   {
@@ -158,6 +160,9 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
           </main>
         </div>
       </div>
+      
+      {/* Chat Bot Component */}
+      <ChatBot />
     </SidebarProvider>
   );
 };

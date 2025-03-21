@@ -12,32 +12,32 @@ type QuickStat = {
 
 const quickStats: QuickStat[] = [
   {
-    label: "Alertes actives",
+    label: "Active Alerts",
     value: "5",
     icon: Activity,
     trend: "down",
-    trendValue: "-2 depuis hier"
+    trendValue: "-2 since yesterday"
   },
   {
-    label: "Certificats expirants",
+    label: "Expiring Certificates",
     value: "3",
     icon: Shield,
     trend: "up",
-    trendValue: "+1 depuis la semaine dernière"
+    trendValue: "+1 since last week"
   },
   {
-    label: "Serveurs critiques",
+    label: "Critical Servers",
     value: "0",
     icon: Server,
     trend: "neutral",
-    trendValue: "Tous stables"
+    trendValue: "All stable"
   },
   {
-    label: "Performance globale",
+    label: "Overall Performance",
     value: "97.8%",
     icon: Zap,
     trend: "up",
-    trendValue: "+0.3% ce mois"
+    trendValue: "+0.3% this month"
   }
 ]
 

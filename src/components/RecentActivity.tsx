@@ -13,30 +13,30 @@ type ActivityItem = {
 const recentActivities: ActivityItem[] = [
   {
     id: "1",
-    title: "Serveur tokyo-01 redémarré",
-    description: "Maintenance planifiée réussie",
-    time: "Il y a 25 minutes",
+    title: "Server tokyo-01 restarted",
+    description: "Scheduled maintenance completed successfully",
+    time: "25 minutes ago",
     type: "info"
   },
   {
     id: "2",
-    title: "Alerte de sécurité",
-    description: "Tentative d'accès non autorisée bloquée",
-    time: "Il y a 2 heures",
+    title: "Security alert",
+    description: "Unauthorized access attempt blocked",
+    time: "2 hours ago",
     type: "warning"
   },
   {
     id: "3",
-    title: "Mise à jour du système",
-    description: "Nouvelles versions de sécurité appliquées",
-    time: "Il y a 4 heures",
+    title: "System update",
+    description: "Security patches applied",
+    time: "4 hours ago",
     type: "info"
   },
   {
     id: "4",
-    title: "Problème de performance",
-    description: "Latence élevée détectée sur le serveur paris-03",
-    time: "Il y a 1 jour",
+    title: "Performance issue",
+    description: "High latency detected on paris-03 server",
+    time: "1 day ago",
     type: "alert"
   }
 ]
@@ -58,7 +58,7 @@ const RecentActivity = () => {
   return (
     <Card>
       <CardHeader className="pb-2">
-        <CardTitle className="text-lg font-medium">Activités récentes</CardTitle>
+        <CardTitle className="text-lg font-medium">Recent Activity</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="space-y-4">

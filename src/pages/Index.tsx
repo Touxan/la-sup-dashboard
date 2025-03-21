@@ -10,6 +10,7 @@ import { Link } from "react-router-dom"
 import { ArrowRight, Home } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useAuth } from "@/contexts/AuthContext"
+import { Card, CardContent } from "@/components/ui/card"
 
 const Index = () => {
   const { user } = useAuth();
@@ -22,23 +23,23 @@ const Index = () => {
             <div className="flex flex-col gap-2">
               <div className="flex items-center gap-2">
                 <Home className="h-5 w-5 text-primary" />
-                <h1 className="text-3xl font-semibold tracking-tight">Tableau de bord</h1>
+                <h1 className="text-3xl font-semibold tracking-tight">Dashboard</h1>
               </div>
               <p className="text-muted-foreground">
-                Bienvenue{user?.email ? `, ${user.email.split('@')[0]}` : ''} ! Voici un aperçu de votre infrastructure.
+                Welcome{user?.email ? `, ${user.email.split('@')[0]}` : ''}! Here's an overview of your infrastructure.
               </p>
               
               <NavigationMenu className="mt-4">
                 <NavigationMenuList>
                   <NavigationMenuItem>
-                    <NavigationMenuTrigger>Accès rapide</NavigationMenuTrigger>
+                    <NavigationMenuTrigger>Quick Access</NavigationMenuTrigger>
                     <NavigationMenuContent>
                       <ul className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px]">
                         {[
-                          { title: "Serveurs", href: "/inventory/servers", description: "Gérer vos serveurs et infrastructure" },
-                          { title: "Alertes", href: "/monitoring/alerts", description: "Consulter et gérer vos alertes" },
-                          { title: "Sécurité", href: "/security/events", description: "Événements de sécurité et conformité" },
-                          { title: "Automatisation", href: "/automation/workflows", description: "Workflows et processus automatisés" }
+                          { title: "Servers", href: "/inventory/servers", description: "Manage your servers and infrastructure" },
+                          { title: "Alerts", href: "/monitoring/alerts", description: "View and manage your alerts" },
+                          { title: "Security", href: "/security/events", description: "Security events and compliance" },
+                          { title: "Automation", href: "/automation/workflows", description: "Workflows and automated processes" }
                         ].map((item) => (
                           <li key={item.title}>
                             <NavigationMenuLink asChild>
@@ -75,16 +76,16 @@ const Index = () => {
             </div>
             
             <div className="mt-8 border-t pt-8">
-              <h2 className="text-xl font-semibold mb-4">Actions recommandées</h2>
+              <h2 className="text-xl font-semibold mb-4">Recommended Actions</h2>
               <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                 <Card>
                   <CardContent className="p-4">
                     <div className="space-y-2">
-                      <p className="text-sm font-medium">Certificats SSL</p>
-                      <p className="text-xs text-muted-foreground">3 certificats expirent dans moins de 30 jours</p>
+                      <p className="text-sm font-medium">SSL Certificates</p>
+                      <p className="text-xs text-muted-foreground">3 certificates expire in less than 30 days</p>
                       <Button variant="outline" size="sm" className="w-full mt-2" asChild>
                         <Link to="/security/certificates">
-                          Vérifier <ArrowRight className="ml-2 h-4 w-4" />
+                          Check <ArrowRight className="ml-2 h-4 w-4" />
                         </Link>
                       </Button>
                     </div>
@@ -93,11 +94,11 @@ const Index = () => {
                 <Card>
                   <CardContent className="p-4">
                     <div className="space-y-2">
-                      <p className="text-sm font-medium">Mises à jour systèmes</p>
-                      <p className="text-xs text-muted-foreground">12 serveurs nécessitent des mises à jour de sécurité</p>
+                      <p className="text-sm font-medium">System Updates</p>
+                      <p className="text-xs text-muted-foreground">12 servers require security updates</p>
                       <Button variant="outline" size="sm" className="w-full mt-2" asChild>
                         <Link to="/inventory/servers">
-                          Consulter <ArrowRight className="ml-2 h-4 w-4" />
+                          View <ArrowRight className="ml-2 h-4 w-4" />
                         </Link>
                       </Button>
                     </div>
@@ -106,11 +107,11 @@ const Index = () => {
                 <Card>
                   <CardContent className="p-4">
                     <div className="space-y-2">
-                      <p className="text-sm font-medium">Groupe de sécurité</p>
-                      <p className="text-xs text-muted-foreground">Révision recommandée pour 2 groupes</p>
+                      <p className="text-sm font-medium">Security Groups</p>
+                      <p className="text-xs text-muted-foreground">Revision recommended for 2 groups</p>
                       <Button variant="outline" size="sm" className="w-full mt-2" asChild>
                         <Link to="/security/groups">
-                          Examiner <ArrowRight className="ml-2 h-4 w-4" />
+                          Review <ArrowRight className="ml-2 h-4 w-4" />
                         </Link>
                       </Button>
                     </div>
@@ -126,6 +127,3 @@ const Index = () => {
 }
 
 export default Index
-
-// Import manquant pour Card et CardContent
-import { Card, CardContent } from "@/components/ui/card"
