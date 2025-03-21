@@ -1,4 +1,3 @@
-
 import { useState } from "react"
 import { Bot, Send, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -7,7 +6,7 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { toast } from "sonner"
-import { useMobile } from "@/hooks/use-mobile"
+import { useIsMobile } from "@/hooks/use-mobile"
 
 type Message = {
   id: string
@@ -28,7 +27,7 @@ const ChatBot = () => {
     },
   ])
   const [isLoading, setIsLoading] = useState(false)
-  const isMobile = useMobile()
+  const isMobile = useIsMobile()
 
   const handleSend = async () => {
     if (!input.trim()) return
