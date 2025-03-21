@@ -22,6 +22,7 @@ import Settings from "./pages/Settings";
 import ApiKeys from "./pages/ApiKeys";
 import Auth from "./pages/Auth";
 import Metrics from "./pages/Metrics";
+import Logs from "./pages/Logs";
 
 const queryClient = new QueryClient();
 
@@ -47,6 +48,7 @@ const App = () => (
               <Route path="/security/groups" element={<SecurityGroups />} />
               <Route path="/monitoring/alerts" element={<Alerts />} />
               <Route path="/monitoring/metrics" element={<Metrics />} />
+              <Route path="/monitoring/logs" element={<Logs />} />
               <Route path="/myaccount/settings" element={<Settings />} />
               <Route path="/myaccount/api-keys" element={<ApiKeys />} />
             </Route>
