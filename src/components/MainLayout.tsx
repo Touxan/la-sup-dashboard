@@ -41,7 +41,7 @@ const menuItems = [
     label: "Monitoring",
     icon: Activity,
     subItems: [
-      { label: "Metrics", href: "#" },
+      { label: "Metrics", href: "/monitoring/metrics" },
       { label: "Alerts", href: "/monitoring/alerts" },
       { label: "Logs", href: "#" },
     ],
