@@ -77,6 +77,7 @@ export type Database = {
       }
       data_sources: {
         Row: {
+          config: Json | null
           created_at: string
           description: string | null
           id: string
@@ -87,6 +88,7 @@ export type Database = {
           url: string
         }
         Insert: {
+          config?: Json | null
           created_at?: string
           description?: string | null
           id?: string
@@ -97,6 +99,7 @@ export type Database = {
           url: string
         }
         Update: {
+          config?: Json | null
           created_at?: string
           description?: string | null
           id?: string

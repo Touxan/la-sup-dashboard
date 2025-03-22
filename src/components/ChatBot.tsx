@@ -1,12 +1,13 @@
+
 import { useState } from "react"
 import { Bot, Send, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
-import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { toast } from "sonner"
 import { useIsMobile } from "@/hooks/use-mobile"
+import { supabase } from "@/integrations/supabase/client"
 
 type Message = {
   id: string
@@ -29,6 +30,23 @@ const ChatBot = () => {
   const [isLoading, setIsLoading] = useState(false)
   const isMobile = useIsMobile()
 
+  const callMistralAgent = async (messages: { role: string; content: string }[]) => {
+    try {
+      const { data, error } = await supabase.functions.invoke('mistral-agent', {
+        body: { 
+          messages: messages
+        }
+      });
+
+      if (error) throw error;
+      return data.choices[0].message.content;
+    } catch (error: any) {
+      console.error('Error calling Mistral agent:', error);
+      toast.error('Error connecting to AI assistant: ' + error.message);
+      return "I'm sorry, I couldn't process your request at the moment. Please try again later.";
+    }
+  };
+
   const handleSend = async () => {
     if (!input.trim()) return
     
@@ -44,24 +62,17 @@ const ChatBot = () => {
     setInput("")
     setIsLoading(true)
     
-    // Simulate AI response
-    setTimeout(() => {
-      // Get AI response based on user's question
-      let response: string
+    try {
+      // Format messages for Mistral API
+      const formattedMessages = messages
+        .concat(userMessage)
+        .map(message => ({
+          role: message.role,
+          content: message.content
+        }));
       
-      const lowercaseInput = input.toLowerCase()
-      
-      if (lowercaseInput.includes("server") || lowercaseInput.includes("infrastructure")) {
-        response = "We currently have 45 active servers with 99.9% uptime. All servers are performing within expected parameters. Would you like more detailed information about specific server clusters?"
-      } else if (lowercaseInput.includes("security") || lowercaseInput.includes("certificate")) {
-        response = "Your security posture is currently at 98%. There are 3 SSL certificates expiring in the next 30 days, and 5 active security alerts that require attention. Would you like me to provide more details on any of these issues?"
-      } else if (lowercaseInput.includes("alert") || lowercaseInput.includes("warning")) {
-        response = "You currently have 5 active alerts: 2 related to unusual traffic patterns, 2 concerning certificate expiration, and 1 regarding storage capacity. All are low to medium priority. Would you like me to explain any alert in detail?"
-      } else if (lowercaseInput.includes("performance") || lowercaseInput.includes("metric")) {
-        response = "Overall platform performance is at 97.8%, which is a 0.3% improvement over last month. API response times average 124ms, and database queries are completing in under 200ms on average."
-      } else {
-        response = "I can provide information about your infrastructure, security posture, active alerts, and performance metrics. Please ask a specific question about any of these areas, and I'll be happy to help."
-      }
+      // Get AI response from Mistral
+      const response = await callMistralAgent(formattedMessages);
       
       const aiMessage: Message = {
         id: crypto.randomUUID(),
@@ -71,8 +82,12 @@ const ChatBot = () => {
       }
       
       setMessages((prev) => [...prev, aiMessage])
+    } catch (error) {
+      console.error("Error getting AI response:", error);
+      toast.error("Failed to get response from AI assistant");
+    } finally {
       setIsLoading(false)
-    }, 1000)
+    }
   }
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -136,7 +151,7 @@ const ChatBot = () => {
             placeholder="Ask about metrics, security, alerts..."
             className="min-h-[2.5rem] h-[2.5rem] resize-none"
           />
-          <Button onClick={handleSend} size="icon">
+          <Button onClick={handleSend} size="icon" disabled={isLoading}>
             <Send className="h-4 w-4" />
           </Button>
         </div>
