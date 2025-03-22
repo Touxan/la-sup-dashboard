@@ -132,6 +132,7 @@ const ChatBot = () => {
     toast.success("Chat history cleared")
   }
 
+  // Fix: Use a proper change handler to maintain cursor position
   const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setInput(e.target.value)
   }
