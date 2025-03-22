@@ -6,10 +6,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { DateRangePicker } from "@/components/metrics/DateRangePicker";
-import { LogsTable } from "@/components/logs/LogsTable";
-import { LogsFilter } from "@/components/logs/LogsFilter";
-import { RefreshCcw, Download, FileDown, Search } from "lucide-react";
+import { RefreshCcw, FileDown, Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
 
 // Sample data - in a real app, this would come from an API
 const hosts = [
@@ -19,10 +19,49 @@ const hosts = [
   { id: "host-4", name: "Staging Server" },
 ];
 
+// Sample logs data
+const generateSampleLogs = (type: string, count: number = 15) => {
+  const severities = ["info", "warning", "error", "critical"];
+  const sources = ["system", "application", "security", "network"];
+  const messages = [
+    "Server started",
+    "Connection attempt failed",
+    "User login successful",
+    "Authentication failed",
+    "Resource exhausted",
+    "Service unavailable",
+    "File not found",
+    "Permission denied",
+    "Configuration changed",
+    "Memory limit reached"
+  ];
+
+  return Array(count).fill(0).map((_, i) => ({
+    id: `log-${type}-${i}`,
+    timestamp: new Date(Date.now() - Math.random() * 86400000 * 3).toISOString(),
+    severity: severities[Math.floor(Math.random() * severities.length)],
+    source: sources[Math.floor(Math.random() * sources.length)],
+    message: messages[Math.floor(Math.random() * messages.length)],
+    hostId: hosts[Math.floor(Math.random() * hosts.length)].id
+  }));
+};
+
+// Helper function to convert severity to Badge variant
+const getSeverityVariant = (severity: string) => {
+  switch (severity) {
+    case "error": return "destructive";
+    case "warning": return "warning";
+    case "critical": return "destructive";
+    case "info": return "secondary";
+    default: return "secondary";
+  }
+};
+
 const Logs = () => {
   const [selectedHost, setSelectedHost] = useState<string>("all");
   const [viewType, setViewType] = useState<"system" | "container" | "security">("system");
   const [searchQuery, setSearchQuery] = useState<string>("");
+  const [selectedSeverities, setSelectedSeverities] = useState<string[]>([]);
 
   const handleRefresh = () => {
     // In a real app, this would refresh the logs data
@@ -33,6 +72,29 @@ const Logs = () => {
     // In a real app, this would export the logs data
     console.log("Exporting logs data");
   };
+
+  // Generate logs for current view type
+  const logs = generateSampleLogs(viewType);
+
+  // Filter logs based on selected host and search query
+  const filteredLogs = logs.filter(log => {
+    // Filter by host
+    if (selectedHost !== "all" && log.hostId !== selectedHost) {
+      return false;
+    }
+    
+    // Filter by search query
+    if (searchQuery && !log.message.toLowerCase().includes(searchQuery.toLowerCase())) {
+      return false;
+    }
+    
+    // Filter by severity if any selected
+    if (selectedSeverities.length > 0 && !selectedSeverities.includes(log.severity)) {
+      return false;
+    }
+    
+    return true;
+  });
 
   return (
     <MainLayout>
@@ -98,7 +160,24 @@ const Logs = () => {
               <CardDescription>Filter logs by severity, source, and more</CardDescription>
             </CardHeader>
             <CardContent>
-              <LogsFilter logType={viewType} />
+              <div className="flex flex-wrap gap-2">
+                {["info", "warning", "error", "critical"].map(severity => (
+                  <Badge 
+                    key={severity}
+                    variant={getSeverityVariant(severity)}
+                    className={`cursor-pointer ${selectedSeverities.includes(severity) ? 'opacity-100' : 'opacity-50'}`}
+                    onClick={() => {
+                      if (selectedSeverities.includes(severity)) {
+                        setSelectedSeverities(selectedSeverities.filter(s => s !== severity));
+                      } else {
+                        setSelectedSeverities([...selectedSeverities, severity]);
+                      }
+                    }}
+                  >
+                    {severity.charAt(0).toUpperCase() + severity.slice(1)}
+                  </Badge>
+                ))}
+              </div>
             </CardContent>
           </Card>
 
@@ -109,11 +188,39 @@ const Logs = () => {
                 <CardDescription>System and host logs</CardDescription>
               </CardHeader>
               <CardContent>
-                <LogsTable 
-                  type="system" 
-                  hostId={selectedHost !== "all" ? selectedHost : undefined} 
-                  searchQuery={searchQuery}
-                />
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Time</TableHead>
+                      <TableHead>Severity</TableHead>
+                      <TableHead>Source</TableHead>
+                      <TableHead className="w-[45%]">Message</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredLogs.map(log => (
+                      <TableRow key={log.id}>
+                        <TableCell className="font-mono text-xs">
+                          {new Date(log.timestamp).toLocaleString()}
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant={getSeverityVariant(log.severity)}>
+                            {log.severity}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>{log.source}</TableCell>
+                        <TableCell className="max-w-md truncate">{log.message}</TableCell>
+                      </TableRow>
+                    ))}
+                    {filteredLogs.length === 0 && (
+                      <TableRow>
+                        <TableCell colSpan={4} className="text-center py-6 text-muted-foreground">
+                          No logs found matching your filters
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </TableBody>
+                </Table>
               </CardContent>
             </Card>
           </TabsContent>
@@ -125,11 +232,39 @@ const Logs = () => {
                 <CardDescription>Logs from containers and applications</CardDescription>
               </CardHeader>
               <CardContent>
-                <LogsTable 
-                  type="container" 
-                  hostId={selectedHost !== "all" ? selectedHost : undefined} 
-                  searchQuery={searchQuery}
-                />
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Time</TableHead>
+                      <TableHead>Severity</TableHead>
+                      <TableHead>Source</TableHead>
+                      <TableHead className="w-[45%]">Message</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredLogs.map(log => (
+                      <TableRow key={log.id}>
+                        <TableCell className="font-mono text-xs">
+                          {new Date(log.timestamp).toLocaleString()}
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant={getSeverityVariant(log.severity)}>
+                            {log.severity}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>{log.source}</TableCell>
+                        <TableCell className="max-w-md truncate">{log.message}</TableCell>
+                      </TableRow>
+                    ))}
+                    {filteredLogs.length === 0 && (
+                      <TableRow>
+                        <TableCell colSpan={4} className="text-center py-6 text-muted-foreground">
+                          No logs found matching your filters
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </TableBody>
+                </Table>
               </CardContent>
             </Card>
           </TabsContent>
@@ -141,11 +276,39 @@ const Logs = () => {
                 <CardDescription>Security audit and event logs</CardDescription>
               </CardHeader>
               <CardContent>
-                <LogsTable 
-                  type="security" 
-                  hostId={selectedHost !== "all" ? selectedHost : undefined} 
-                  searchQuery={searchQuery}
-                />
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Time</TableHead>
+                      <TableHead>Severity</TableHead>
+                      <TableHead>Source</TableHead>
+                      <TableHead className="w-[45%]">Message</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredLogs.map(log => (
+                      <TableRow key={log.id}>
+                        <TableCell className="font-mono text-xs">
+                          {new Date(log.timestamp).toLocaleString()}
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant={getSeverityVariant(log.severity)}>
+                            {log.severity}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>{log.source}</TableCell>
+                        <TableCell className="max-w-md truncate">{log.message}</TableCell>
+                      </TableRow>
+                    ))}
+                    {filteredLogs.length === 0 && (
+                      <TableRow>
+                        <TableCell colSpan={4} className="text-center py-6 text-muted-foreground">
+                          No logs found matching your filters
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </TableBody>
+                </Table>
               </CardContent>
             </Card>
           </TabsContent>
