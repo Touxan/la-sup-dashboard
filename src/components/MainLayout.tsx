@@ -1,4 +1,3 @@
-
 import { Menu, User, ChevronLeft, Server, Activity, Shield, Cog, Bell, LogOut } from "lucide-react"
 import { Link, useNavigate } from "react-router-dom"
 import { Button } from "@/components/ui/button"
@@ -161,7 +160,6 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
         </div>
       </div>
       
-      {/* Chat Bot Component */}
       <ChatBot />
     </SidebarProvider>
   );
