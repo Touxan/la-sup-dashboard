@@ -106,7 +106,7 @@ const ChatBot = () => {
       toast.error("Failed to get response from AI assistant");
     } finally {
       setIsLoading(false)
-      // Maintenir le focus sur l'input après avoir reçu la réponse
+      // Maintain focus on the input after receiving a response
       requestAnimationFrame(() => {
         inputRef.current?.focus()
       })
@@ -130,6 +130,10 @@ const ChatBot = () => {
       },
     ])
     toast.success("Chat history cleared")
+  }
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setInput(e.target.value)
   }
 
   const ChatContent = () => (
@@ -193,7 +197,7 @@ const ChatBot = () => {
           <Textarea
             ref={inputRef}
             value={input}
-            onChange={(e) => setInput(e.target.value)}
+            onChange={handleInputChange}
             onKeyDown={handleKeyDown}
             placeholder="Ask about metrics, security, alerts..."
             className="min-h-[2.5rem] h-[2.5rem] resize-none"
