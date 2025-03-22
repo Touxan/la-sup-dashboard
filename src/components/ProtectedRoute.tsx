@@ -1,9 +1,11 @@
 
 import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { AlertTriangle } from "lucide-react";
 
 interface ProtectedRouteProps {
-  requiredRole?: string;
+  requiredRole?: 'admin' | 'user' | 'viewer';
 }
 
 const ProtectedRoute = ({ requiredRole }: ProtectedRouteProps) => {
@@ -24,9 +26,23 @@ const ProtectedRoute = ({ requiredRole }: ProtectedRouteProps) => {
     return <Navigate to="/auth" state={{ from: location }} replace />;
   }
 
-  // If a specific role is required and user doesn't have it, redirect to home
+  // If a specific role is required and user doesn't have it, show access denied
   if (requiredRole && userRole !== requiredRole) {
-    return <Navigate to="/" replace />;
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="w-full max-w-md">
+          <Alert variant="destructive" className="mb-4">
+            <AlertTriangle className="h-5 w-5 mr-2" />
+            <AlertDescription>
+              Accès refusé. Vous n'avez pas les permissions nécessaires pour accéder à cette page.
+            </AlertDescription>
+          </Alert>
+          <div className="text-center mt-4">
+            <Navigate to="/" replace />
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return <Outlet />;

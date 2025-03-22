@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -31,6 +31,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { Invitation } from "@/types/invitations";
 
 // Schema for form validation
 const inviteSchema = z.object({
@@ -41,16 +42,6 @@ const inviteSchema = z.object({
 });
 
 type InviteFormValues = z.infer<typeof inviteSchema>;
-
-// Interface for the invitation data from the database
-interface Invitation {
-  id: string;
-  email: string;
-  role: string;
-  created_at: string;
-  expires_at: string;
-  used: boolean;
-}
 
 const InviteUsers = () => {
   const [invitations, setInvitations] = useState<Invitation[]>([]);
@@ -64,21 +55,20 @@ const InviteUsers = () => {
     },
   });
 
-  // Fetch invitations when component mounts
-  useState(() => {
+  useEffect(() => {
     fetchInvitations();
-  });
+  }, []);
 
   const fetchInvitations = async () => {
     try {
       setLoadingInvites(true);
       const { data, error } = await supabase
-        .from("invitations")
-        .select("*")
-        .order("created_at", { ascending: false });
+        .from('invitations')
+        .select('*')
+        .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setInvitations(data || []);
+      setInvitations(data as Invitation[] || []);
     } catch (error) {
       console.error("Error fetching invitations:", error);
       toast.error("Impossible de récupérer les invitations");

@@ -63,7 +63,7 @@ const UserManagement = () => {
     }
   };
 
-  const updateUserRole = async (userId: string, newRole: string) => {
+  const updateUserRole = async (userId: string, newRole: "admin" | "user" | "viewer") => {
     try {
       const { error } = await supabase
         .from("profiles")
@@ -121,7 +121,7 @@ const UserManagement = () => {
                   <TableCell>
                     <Select
                       defaultValue={user.profile?.role || "user"}
-                      onValueChange={(value) => updateUserRole(user.id, value)}
+                      onValueChange={(value: "admin" | "user" | "viewer") => updateUserRole(user.id, value)}
                     >
                       <SelectTrigger className="w-32">
                         <SelectValue />
