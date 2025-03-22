@@ -1,9 +1,11 @@
 
-import { Menu, User, ChevronLeft, Server, Activity, Shield, Cog, Bell, LogOut } from "lucide-react"
+import { Menu, User, ChevronLeft, Server, Activity, Shield, Cog, Bell, Users } from "lucide-react"
 import { Link, useNavigate } from "react-router-dom"
 import { Button } from "@/components/ui/button"
 import { useAuth } from "@/contexts/AuthContext"
 import { toast } from "sonner"
+import { useEffect, useState } from "react"
+import { supabase } from "@/integrations/supabase/client"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -64,11 +66,34 @@ const menuItems = [
       { label: "Templates", href: "/automation/templates" },
     ],
   },
-]
+];
 
 const MainLayout = ({ children }: { children: React.ReactNode }) => {
   const { signOut, user } = useAuth();
   const navigate = useNavigate();
+  const [isAdmin, setIsAdmin] = useState(false);
+  
+  useEffect(() => {
+    const checkAdminStatus = async () => {
+      if (!user) return;
+      
+      try {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('id', user.id)
+          .single();
+          
+        if (error) throw error;
+        
+        setIsAdmin(data.role === 'admin');
+      } catch (error) {
+        console.error("Error checking admin status:", error);
+      }
+    };
+    
+    checkAdminStatus();
+  }, [user]);
   
   const handleSignOut = async () => {
     try {
@@ -116,6 +141,17 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
                       </DropdownMenu>
                     </SidebarMenuItem>
                   ))}
+                  
+                  {isAdmin && (
+                    <SidebarMenuItem>
+                      <SidebarMenuButton asChild>
+                        <Link to="/admin">
+                          <Users className="w-4 h-4" />
+                          <span>Administration</span>
+                        </Link>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  )}
                 </SidebarMenu>
               </SidebarGroupContent>
             </SidebarGroup>
@@ -142,9 +178,14 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
                 <DropdownMenuItem asChild>
                   <Link to="/myaccount/settings">Settings</Link>
                 </DropdownMenuItem>
+                {isAdmin && (
+                  <DropdownMenuItem asChild>
+                    <Link to="/admin">Administration</Link>
+                  </DropdownMenuItem>
+                )}
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleSignOut}>
-                  <LogOut className="mr-2 h-4 w-4" />
+                  <User className="mr-2 h-4 w-4" />
                   Sign Out
                 </DropdownMenuItem>
               </DropdownMenuContent>
