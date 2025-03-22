@@ -30,6 +30,16 @@ serve(async (req) => {
       throw new Error(`Error fetching Mistral configuration: ${configError?.message || 'Configuration not found'}`);
     }
 
+    if (!mistralConfig.config || typeof mistralConfig.config !== 'object') {
+      throw new Error('Invalid Mistral configuration format');
+    }
+
+    const config = mistralConfig.config as { api_key: string, agent_id: string };
+    
+    if (!config.api_key || !config.agent_id) {
+      throw new Error('Missing required Mistral configuration values (api_key or agent_id)');
+    }
+
     // Get user's message
     const { messages } = await req.json();
 
@@ -39,10 +49,10 @@ serve(async (req) => {
       headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
-        'Authorization': `Bearer ${mistralConfig.config.api_key}`,
+        'Authorization': `Bearer ${config.api_key}`,
       },
       body: JSON.stringify({
-        agent_id: mistralConfig.config.agent_id,
+        agent_id: config.agent_id,
         messages: messages
       }),
     });

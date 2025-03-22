@@ -11,6 +11,11 @@ import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Eye, EyeOff } from "lucide-react";
 
+interface MistralConfig {
+  agent_id: string;
+  api_key: string;
+}
+
 const formSchema = z.object({
   agent_id: z.string().min(1, "Agent ID is required"),
   api_key: z.string().min(1, "API Key is required"),
@@ -43,7 +48,7 @@ export function MistralAIForm() {
         return null;
       }
       
-      return data?.config;
+      return data?.config as MistralConfig | null;
     }
   });
 
