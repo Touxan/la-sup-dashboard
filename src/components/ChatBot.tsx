@@ -1,6 +1,6 @@
 
-import { useRef, useState } from "react"
-import { Bot, Send, X } from "lucide-react"
+import { useRef, useState, useEffect } from "react"
+import { Bot, Send, X, Trash2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
@@ -30,6 +30,24 @@ const ChatBot = () => {
   const [isLoading, setIsLoading] = useState(false)
   const isMobile = useIsMobile()
   const inputRef = useRef<HTMLTextAreaElement>(null)
+  const messagesEndRef = useRef<HTMLDivElement>(null)
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
+  }
+
+  useEffect(() => {
+    scrollToBottom()
+  }, [messages])
+
+  useEffect(() => {
+    // Focus the input when the chat is opened
+    if (open) {
+      setTimeout(() => {
+        inputRef.current?.focus()
+      }, 100)
+    }
+  }, [open])
 
   const callMistralAgent = async (messages: { role: string; content: string }[]) => {
     try {
@@ -88,10 +106,10 @@ const ChatBot = () => {
       toast.error("Failed to get response from AI assistant");
     } finally {
       setIsLoading(false)
-      // Rétablir le focus sur l'input après avoir reçu la réponse
-      setTimeout(() => {
-        inputRef.current?.focus();
-      }, 100);
+      // Maintenir le focus sur l'input après avoir reçu la réponse
+      requestAnimationFrame(() => {
+        inputRef.current?.focus()
+      })
     }
   }
 
@@ -102,6 +120,18 @@ const ChatBot = () => {
     }
   }
 
+  const clearChatHistory = () => {
+    setMessages([
+      {
+        id: "welcome",
+        content: "Hello! I'm your AI assistant. I can answer questions about your infrastructure metrics, security events, and other system information. How can I help you today?",
+        role: "assistant",
+        timestamp: new Date(),
+      },
+    ])
+    toast.success("Chat history cleared")
+  }
+
   const ChatContent = () => (
     <div className="flex flex-col h-full">
       <div className="flex items-center justify-between p-4 border-b">
@@ -109,9 +139,19 @@ const ChatBot = () => {
           <Bot className="h-5 w-5 text-primary" />
           <h3 className="font-medium">AI Assistant</h3>
         </div>
-        <Button variant="ghost" size="icon" onClick={() => setOpen(false)}>
-          <X className="h-4 w-4" />
-        </Button>
+        <div className="flex gap-2">
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            onClick={clearChatHistory}
+            title="Clear chat history"
+          >
+            <Trash2 className="h-4 w-4" />
+          </Button>
+          <Button variant="ghost" size="icon" onClick={() => setOpen(false)}>
+            <X className="h-4 w-4" />
+          </Button>
+        </div>
       </div>
       
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
@@ -145,6 +185,7 @@ const ChatBot = () => {
             </div>
           </div>
         )}
+        <div ref={messagesEndRef} />
       </div>
       
       <div className="p-4 border-t bg-background">
@@ -156,6 +197,7 @@ const ChatBot = () => {
             onKeyDown={handleKeyDown}
             placeholder="Ask about metrics, security, alerts..."
             className="min-h-[2.5rem] h-[2.5rem] resize-none"
+            autoFocus
           />
           <Button onClick={handleSend} size="icon" disabled={isLoading}>
             <Send className="h-4 w-4" />
