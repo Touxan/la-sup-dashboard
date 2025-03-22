@@ -48,7 +48,16 @@ export function MistralAIForm() {
         return null;
       }
       
-      return data?.config as MistralConfig | null;
+      // Type checking and casting
+      if (data?.config && typeof data.config === 'object') {
+        const config = data.config as Record<string, unknown>;
+        return {
+          agent_id: String(config.agent_id || ""),
+          api_key: String(config.api_key || "")
+        } as MistralConfig;
+      }
+      
+      return { agent_id: "", api_key: "" } as MistralConfig;
     }
   });
 

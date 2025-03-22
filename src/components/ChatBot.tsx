@@ -1,5 +1,5 @@
 
-import { useState } from "react"
+import { useRef, useState } from "react"
 import { Bot, Send, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer"
@@ -29,6 +29,7 @@ const ChatBot = () => {
   ])
   const [isLoading, setIsLoading] = useState(false)
   const isMobile = useIsMobile()
+  const inputRef = useRef<HTMLTextAreaElement>(null)
 
   const callMistralAgent = async (messages: { role: string; content: string }[]) => {
     try {
@@ -87,6 +88,10 @@ const ChatBot = () => {
       toast.error("Failed to get response from AI assistant");
     } finally {
       setIsLoading(false)
+      // Rétablir le focus sur l'input après avoir reçu la réponse
+      setTimeout(() => {
+        inputRef.current?.focus();
+      }, 100);
     }
   }
 
@@ -145,6 +150,7 @@ const ChatBot = () => {
       <div className="p-4 border-t bg-background">
         <div className="flex gap-2">
           <Textarea
+            ref={inputRef}
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
