@@ -1,6 +1,5 @@
 
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -9,7 +8,6 @@ import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 
 const SignInForm = () => {
-  const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -31,7 +29,7 @@ const SignInForm = () => {
       
       console.log("Sign in successful, user:", data.user?.id);
       
-      // The redirect will be handled by the AuthPage component
+      // Auth state change will handle redirection via AuthPage component
     } catch (error: any) {
       console.error("Sign in error:", error);
       

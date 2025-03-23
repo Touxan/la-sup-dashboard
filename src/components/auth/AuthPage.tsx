@@ -13,23 +13,26 @@ const AuthPage = () => {
   const location = useLocation();
   const { user, loading } = useAuth();
   const [activeTab, setActiveTab] = useState("login");
-  const [redirecting, setRedirecting] = useState(false);
+  const [isRedirecting, setIsRedirecting] = useState(false);
   
+  // Handle redirection if user is authenticated
   useEffect(() => {
-    // Only redirect if we have a user and loading is false and we're not already redirecting
-    if (user && !loading && !redirecting) {
-      setRedirecting(true);
-      const from = location.state?.from?.pathname || "/";
-      console.log("User is authenticated, redirecting to:", from);
+    // Only redirect if we have a user and loading is complete
+    if (user && !loading && !isRedirecting) {
+      console.log("User is authenticated in AuthPage, redirecting");
+      setIsRedirecting(true);
       
-      // Small timeout to prevent redirect loops
+      // Get the redirect path from location state or default to home
+      const from = location.state?.from?.pathname || "/";
+      
+      // Use timeout to prevent redirection loops
       setTimeout(() => {
         navigate(from, { replace: true });
       }, 100);
     }
-  }, [user, loading, navigate, location, redirecting]);
+  }, [user, loading, navigate, location, isRedirecting]);
 
-  // Show loading while authentication status is being checked
+  // Show loading spinner while checking auth status
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen">
@@ -39,8 +42,8 @@ const AuthPage = () => {
     );
   }
 
-  // Don't render the auth form if user is authenticated (will be redirected by useEffect)
-  if (user) {
+  // If user is authenticated, show redirecting message
+  if (user && !loading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />

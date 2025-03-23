@@ -13,7 +13,7 @@ const ProtectedRoute = () => {
   // Check if current path is an admin-only route
   const isAdminRoute = location.pathname.startsWith("/administration");
   
-  // Show loading spinner only if we're still in the initial loading state
+  // Show loading spinner only during initial loading
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen">

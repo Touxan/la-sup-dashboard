@@ -15,7 +15,7 @@ const Administration = () => {
   
   console.log("Administration page - userRole:", userRole, "loading:", loading, "user:", user ? "exists" : "null");
 
-  // Show loading while the role is being determined
+  // Show loading while role is being determined
   if (loading) {
     return (
       <MainLayout>

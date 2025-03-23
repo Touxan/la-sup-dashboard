@@ -35,6 +35,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             
             if (!mounted) return;
             
+            // Update session and user state
             setSession(currentSession);
             setUser(currentSession?.user ?? null);
             
@@ -65,6 +66,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
         
         console.log("Initial auth session:", initialSession ? "Authenticated" : "Not authenticated");
+        
         setSession(initialSession);
         setUser(initialSession?.user ?? null);
         
@@ -115,7 +117,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       
       if (error) {
         console.error("Error fetching user role:", error);
-        throw error;
+        setLoading(false);
+        return;
       }
       
       if (data) {
@@ -141,22 +144,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signOut = async () => {
     try {
       console.log("Starting sign out process");
-      setLoading(true);
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
       
       console.log("Sign out successful");
+      // Clear all auth state
       setUser(null);
       setSession(null);
       setUserRole("user");
       
-      // Use a regular redirect instead of navigate to ensure complete reset
+      // Force redirect to auth page
       window.location.href = "/auth";
     } catch (error) {
       console.error("Exception during sign out:", error);
       toast.error("Error signing out");
-    } finally {
-      setLoading(false);
     }
   };
 
