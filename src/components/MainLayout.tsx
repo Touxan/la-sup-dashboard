@@ -1,9 +1,9 @@
+
 import { useState, useEffect } from "react";
-import { Link, Outlet, useNavigate, useLocation } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Sidebar, useSidebar } from "@/components/ui/sidebar";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useIsMobile } from "@/hooks/use-mobile";
 import {
@@ -20,6 +20,7 @@ import {
   FileCode,
   Key,
   UserCog,
+  Menu,
 } from "lucide-react";
 
 interface MainLayoutProps {
@@ -31,7 +32,7 @@ const MainLayout = ({ children }: MainLayoutProps) => {
   const navigate = useNavigate();
   const location = useLocation();
   const isMobile = useIsMobile();
-  const { isOpen, setIsOpen } = useSidebar();
+  const [isOpen, setIsOpen] = useState(!isMobile);
 
   // Close sidebar on mobile by default
   useEffect(() => {
@@ -40,7 +41,7 @@ const MainLayout = ({ children }: MainLayoutProps) => {
     } else {
       setIsOpen(true);
     }
-  }, [isMobile, setIsOpen]);
+  }, [isMobile]);
 
   // Handle logout
   const handleLogout = async () => {
@@ -128,16 +129,21 @@ const MainLayout = ({ children }: MainLayoutProps) => {
   return (
     <div className="flex h-screen bg-background">
       {/* Sidebar */}
-      <Sidebar
-        isOpen={isOpen} 
-        onOpenChange={setIsOpen}
-        className="border-r"
+      <div
+        className={`flex h-full flex-col overflow-hidden border-r transition-all duration-300 ease-in-out ${
+          isOpen ? "w-64" : "w-16"
+        }`}
       >
         <div className="flex h-14 items-center border-b px-4">
           <Link to="/" className="flex items-center gap-2 font-semibold">
             <Shield className="h-6 w-6" />
             <span className={isOpen ? "block" : "hidden"}>CloudAdmin</span>
           </Link>
+          <div className="ml-auto">
+            <Button variant="ghost" size="icon" onClick={() => setIsOpen(!isOpen)}>
+              <Menu className="h-5 w-5" />
+            </Button>
+          </div>
         </div>
         <ScrollArea className="flex-1">
           <nav className="flex flex-col gap-1 p-2">
@@ -214,7 +220,7 @@ const MainLayout = ({ children }: MainLayoutProps) => {
             </Button>
           </div>
         </div>
-      </Sidebar>
+      </div>
 
       {/* Main content */}
       <div className="flex-1 overflow-auto">
