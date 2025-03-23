@@ -11,10 +11,24 @@ import UserInvitation from "@/components/admin/UserInvitation";
 import SystemSettings from "@/components/admin/SystemSettings";
 
 const Administration = () => {
-  const { userRole } = useAuth();
+  const { userRole, loading } = useAuth();
+  
+  console.log("Administration page - userRole:", userRole, "loading:", loading);
+
+  // Show loading while the role is being determined
+  if (loading) {
+    return (
+      <MainLayout>
+        <div className="flex justify-center items-center h-screen">
+          <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-primary"></div>
+        </div>
+      </MainLayout>
+    );
+  }
 
   // Redirect non-admin users
   if (userRole !== "admin") {
+    console.log("Non-admin user attempting to access admin page, redirecting");
     return <Navigate to="/" replace />;
   }
 

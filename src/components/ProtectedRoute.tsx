@@ -11,9 +11,9 @@ const ProtectedRoute = () => {
   console.log("Current path:", location.pathname);
   
   // Check if current path is an admin-only route
-  const isAdminRoute = location.pathname.includes("/administration");
+  const isAdminRoute = location.pathname.startsWith("/administration");
   
-  // Show loading spinner while checking authentication
+  // Show loading spinner only if we're still in the initial loading state
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen">

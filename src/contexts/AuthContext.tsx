@@ -21,6 +21,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [userRole, setUserRole] = useState<UserRole>("user");
+  const [initializationAttempted, setInitializationAttempted] = useState(false);
 
   useEffect(() => {
     console.log("Setting up auth state listener");
@@ -28,7 +29,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     
     async function initializeAuth() {
       try {
-        // Set up auth state listener FIRST
+        if (!mounted) return;
+
+        // First set up auth state listener
         const { data: { subscription } } = supabase.auth.onAuthStateChange(
           async (event, currentSession) => {
             console.log("Auth state changed:", event, currentSession ? "Session exists" : "No session");
@@ -48,7 +51,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             
             if (event === 'SIGNED_IN') {
               console.log("User signed in:", currentSession?.user?.email);
-              console.log("User details:", currentSession?.user);
               toast.success("Successfully signed in");
             } else if (event === 'SIGNED_OUT') {
               console.log("User signed out");
@@ -58,7 +60,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           }
         );
 
-        // THEN check for existing session
+        // Then check for existing session
         const { data: { session: initialSession }, error } = await supabase.auth.getSession();
         
         if (!mounted) return;
@@ -66,6 +68,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (error) {
           console.error("Error getting session:", error);
           setLoading(false);
+          setInitializationAttempted(true);
           return;
         }
         
@@ -80,6 +83,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setLoading(false);
         }
         
+        // Mark initialization as attempted even if there's no session
+        setInitializationAttempted(true);
+        
         return () => {
           mounted = false;
           subscription.unsubscribe();
@@ -88,14 +94,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         console.error("Auth initialization error:", error);
         if (mounted) {
           setLoading(false);
+          setInitializationAttempted(true);
         }
       }
     }
     
     initializeAuth();
     
+    // Added a timeout to ensure loading state doesn't hang indefinitely
+    const timeoutId = setTimeout(() => {
+      if (mounted && loading && !initializationAttempted) {
+        console.log("Auth initialization timed out - forcing loading to false");
+        setLoading(false);
+        setInitializationAttempted(true);
+      }
+    }, 5000); // 5 second timeout
+    
     return () => {
       mounted = false;
+      clearTimeout(timeoutId);
     };
   }, []);
 
@@ -133,6 +150,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUserRole("user");
     } finally {
       setLoading(false);
+      setInitializationAttempted(true);
     }
   };
 

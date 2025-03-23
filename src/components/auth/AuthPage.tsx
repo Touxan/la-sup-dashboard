@@ -13,29 +13,36 @@ const AuthPage = () => {
   const location = useLocation();
   const { user, loading } = useAuth();
   const [activeTab, setActiveTab] = useState("login");
+  const [redirectAttempted, setRedirectAttempted] = useState(false);
   
   useEffect(() => {
-    // Redirect to home if already logged in
-    if (user && !loading) {
+    // Only redirect if we have a user and loading is false
+    if (user && !loading && !redirectAttempted) {
+      setRedirectAttempted(true);
       const from = location.state?.from?.pathname || "/";
       console.log("User is authenticated, redirecting to:", from);
       navigate(from, { replace: true });
     }
-  }, [user, loading, navigate, location]);
+  }, [user, loading, navigate, location, redirectAttempted]);
 
   // Show loading while authentication status is being checked
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        <p className="mt-4 text-muted-foreground">Loading...</p>
+        <p className="mt-4 text-muted-foreground">Loading authentication status...</p>
       </div>
     );
   }
 
   // Don't render the auth form if user is authenticated (will be redirected by useEffect)
   if (user) {
-    return null;
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <p className="mt-4 text-muted-foreground">Redirecting...</p>
+      </div>
+    );
   }
 
   return (
