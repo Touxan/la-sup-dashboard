@@ -4,10 +4,13 @@ import { supabase } from "@/integrations/supabase/client";
 import type { Session, User } from "@supabase/supabase-js";
 import { toast } from "sonner";
 
+type UserRole = "user" | "admin";
+
 type AuthContextType = {
   session: Session | null;
   user: User | null;
   loading: boolean;
+  userRole: UserRole;
   signOut: () => Promise<void>;
 };
 
@@ -17,6 +20,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [userRole, setUserRole] = useState<UserRole>("user");
 
   useEffect(() => {
     // Get initial session
@@ -24,6 +28,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       console.log("Initial auth session:", session ? "Authenticated" : "Not authenticated");
       setSession(session);
       setUser(session?.user ?? null);
+      
+      // For demo purposes, set some users as admin
+      // In a real app, you would fetch this from a database
+      const adminEmails = ["admin@example.com", "pablo.barpro@gmail.com"];
+      if (session?.user && adminEmails.includes(session.user.email || "")) {
+        setUserRole("admin");
+      } else {
+        setUserRole("user");
+      }
+      
       setLoading(false);
     });
 
@@ -33,6 +47,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         console.log("Auth state changed:", event, session ? "Session exists" : "No session");
         setSession(session);
         setUser(session?.user ?? null);
+        
+        // Update user role when auth state changes
+        const adminEmails = ["admin@example.com", "pablo.barpro@gmail.com"];
+        if (session?.user && adminEmails.includes(session.user.email || "")) {
+          setUserRole("admin");
+        } else {
+          setUserRole("user");
+        }
+        
         setLoading(false);
         
         if (event === 'SIGNED_IN') {
@@ -79,6 +102,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     session,
     user,
     loading,
+    userRole,
     signOut,
   };
 

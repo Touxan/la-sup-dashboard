@@ -22,6 +22,7 @@ import Settings from "./pages/Settings";
 import Auth from "./pages/Auth";
 import Metrics from "./pages/Metrics";
 import Logs from "./pages/Logs";
+import Administration from "./pages/Administration";
 
 const queryClient = new QueryClient();
 
@@ -49,6 +50,7 @@ const App = () => (
               <Route path="/monitoring/metrics" element={<Metrics />} />
               <Route path="/monitoring/logs" element={<Logs />} />
               <Route path="/myaccount/settings" element={<Settings />} />
+              <Route path="/administration" element={<Administration />} />
             </Route>
             
             <Route path="*" element={<NotFound />} />

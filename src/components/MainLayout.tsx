@@ -67,7 +67,7 @@ const menuItems = [
 ]
 
 const MainLayout = ({ children }: { children: React.ReactNode }) => {
-  const { signOut, user } = useAuth();
+  const { signOut, user, userRole } = useAuth();
   const navigate = useNavigate();
   
   const handleSignOut = async () => {
@@ -142,6 +142,11 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
                 <DropdownMenuItem asChild>
                   <Link to="/myaccount/settings">Settings</Link>
                 </DropdownMenuItem>
+                {userRole === "admin" && (
+                  <DropdownMenuItem asChild>
+                    <Link to="/administration">Administration</Link>
+                  </DropdownMenuItem>
+                )}
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleSignOut}>
                   <LogOut className="mr-2 h-4 w-4" />
