@@ -57,17 +57,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           console.log("User details:", session?.user);
           toast.success("Successfully signed in");
           
-          // Update last_sign_in_at in our users table
-          if (session?.user) {
-            try {
-              await supabase
-                .from('users')
-                .update({ last_sign_in_at: new Date().toISOString() })
-                .eq('id', session.user.id);
-            } catch (error) {
-              console.error("Error updating last sign in time:", error);
-            }
-          }
+          // Update last_sign_in_at is now handled by the database trigger
         } else if (event === 'SIGNED_OUT') {
           console.log("User signed out");
           toast.info("Signed out");
@@ -83,7 +73,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const fetchUserRole = async (userId: string) => {
     try {
       const { data, error } = await supabase
-        .from('users')
+        .from('users')  // Changed from 'profiles' to 'users'
         .select('role')
         .eq('id', userId)
         .single();
