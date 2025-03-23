@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import type { Session, User } from "@supabase/supabase-js";
 import { toast } from "sonner";
 
-type UserRole = "user" | "admin";
+type UserRole = "admin" | "user" | "viewer";
 
 type AuthContextType = {
   session: Session | null;
@@ -29,50 +29,48 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setSession(session);
       setUser(session?.user ?? null);
       
-      // For demo purposes, set some users as admin
-      // In a real app, you would fetch this from a database
-      const adminEmails = ["admin@example.com", "pablo.barpro@gmail.com"];
-      if (session?.user && adminEmails.includes(session.user.email || "")) {
-        setUserRole("admin");
+      if (session?.user) {
+        // Fetch user role from the database
+        fetchUserRole(session.user.id);
       } else {
-        setUserRole("user");
+        setLoading(false);
       }
-      
-      setLoading(false);
     });
 
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
+      async (event, session) => {
         console.log("Auth state changed:", event, session ? "Session exists" : "No session");
         setSession(session);
         setUser(session?.user ?? null);
         
-        // Update user role when auth state changes
-        const adminEmails = ["admin@example.com", "pablo.barpro@gmail.com"];
-        if (session?.user && adminEmails.includes(session.user.email || "")) {
-          setUserRole("admin");
+        if (session?.user) {
+          // Fetch user role from the database
+          await fetchUserRole(session.user.id);
         } else {
           setUserRole("user");
+          setLoading(false);
         }
-        
-        setLoading(false);
         
         if (event === 'SIGNED_IN') {
           console.log("User signed in:", session?.user?.email);
           console.log("User details:", session?.user);
           toast.success("Successfully signed in");
+          
+          // Update last_sign_in_at in our users table
+          if (session?.user) {
+            try {
+              await supabase
+                .from('users')
+                .update({ last_sign_in_at: new Date().toISOString() })
+                .eq('id', session.user.id);
+            } catch (error) {
+              console.error("Error updating last sign in time:", error);
+            }
+          }
         } else if (event === 'SIGNED_OUT') {
           console.log("User signed out");
           toast.info("Signed out");
-        } else if (event === 'USER_UPDATED') {
-          console.log("User updated:", session?.user);
-        } else if (event === 'PASSWORD_RECOVERY') {
-          console.log("Password recovery event");
-        } else if (event === 'TOKEN_REFRESHED') {
-          console.log("Token refreshed");
-        } else {
-          console.log("Other auth event:", event);
         }
       }
     );
@@ -81,6 +79,30 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       subscription.unsubscribe();
     };
   }, []);
+
+  const fetchUserRole = async (userId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('users')
+        .select('role')
+        .eq('id', userId)
+        .single();
+      
+      if (error) {
+        throw error;
+      }
+      
+      if (data) {
+        setUserRole(data.role as UserRole);
+      }
+    } catch (error) {
+      console.error("Error fetching user role:", error);
+      // Default to user role if there's an error
+      setUserRole("user");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const signOut = async () => {
     try {

@@ -79,28 +79,15 @@ const Administration = () => {
     try {
       setLoading(true);
       
-      // Fetch users from profiles table using Supabase
-      const { data: profiles, error: profilesError } = await supabase
-        .from('profiles')
-        .select('id, role, full_name, created_at')
+      // Fetch users from the new users table
+      const { data, error } = await supabase
+        .from('users')
+        .select('*')
         .order('created_at', { ascending: false });
       
-      if (profilesError) throw profilesError;
-
-      // Since we don't have direct access to auth.users through the client,
-      // We'll use what we have in the profiles table
-      const mappedUsers = profiles?.map(profile => {
-        return {
-          id: profile.id,
-          email: profile.id.substring(0, 8) + '...', // Abbreviated ID as placeholder
-          full_name: profile.full_name || 'Unknown',
-          created_at: profile.created_at,
-          last_sign_in_at: null, // We don't have this in profiles
-          role: profile.role as UserRole
-        };
-      }) || [];
+      if (error) throw error;
       
-      setUsers(mappedUsers);
+      setUsers(data as UserData[]);
     } catch (error) {
       console.error("Error fetching users:", error);
       toast.error("Failed to load users");
@@ -160,7 +147,7 @@ const Administration = () => {
       const { userId, newRole } = roleChangeDialog;
       
       const { error } = await supabase
-        .from('profiles')
+        .from('users')
         .update({ role: newRole })
         .eq('id', userId);
       
@@ -224,7 +211,7 @@ const Administration = () => {
                     <TableHeader>
                       <TableRow>
                         <TableHead>Full Name</TableHead>
-                        <TableHead>Email/ID</TableHead>
+                        <TableHead>Email</TableHead>
                         <TableHead>Role</TableHead>
                         <TableHead>Created</TableHead>
                         <TableHead>Last Sign In</TableHead>
@@ -235,7 +222,7 @@ const Administration = () => {
                       {users.length > 0 ? (
                         users.map((user) => (
                           <TableRow key={user.id}>
-                            <TableCell>{user.full_name}</TableCell>
+                            <TableCell>{user.full_name || 'Unknown'}</TableCell>
                             <TableCell>{user.email}</TableCell>
                             <TableCell>
                               <Select
