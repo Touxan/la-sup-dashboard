@@ -41,80 +41,24 @@ function App() {
                 <Route path="/auth" element={<Auth />} />
                 
                 <Route element={<ProtectedRoute />}>
-                  <Route path="/" element={
-                    <MainLayout>
-                      <Index />
-                    </MainLayout>
-                  } />
-                  <Route path="/logs" element={
-                    <MainLayout>
-                      <Logs />
-                    </MainLayout>
-                  } />
-                  <Route path="/metrics" element={
-                    <MainLayout>
-                      <Metrics />
-                    </MainLayout>
-                  } />
-                  <Route path="/inventory" element={
-                    <MainLayout>
-                      <Inventory />
-                    </MainLayout>
-                  } />
-                  <Route path="/inventory/:serverId" element={
-                    <MainLayout>
-                      <ServerDetail />
-                    </MainLayout>
-                  } />
-                  <Route path="/security/groups" element={
-                    <MainLayout>
-                      <SecurityGroups />
-                    </MainLayout>
-                  } />
-                  <Route path="/security/events" element={
-                    <MainLayout>
-                      <SecurityEvents />
-                    </MainLayout>
-                  } />
-                  <Route path="/workflows" element={
-                    <MainLayout>
-                      <Workflows />
-                    </MainLayout>
-                  } />
-                  <Route path="/executions" element={
-                    <MainLayout>
-                      <Executions />
-                    </MainLayout>
-                  } />
-                  <Route path="/alerts" element={
-                    <MainLayout>
-                      <Alerts />
-                    </MainLayout>
-                  } />
-                  <Route path="/templates" element={
-                    <MainLayout>
-                      <Templates />
-                    </MainLayout>
-                  } />
-                  <Route path="/certificates" element={
-                    <MainLayout>
-                      <Certificates />
-                    </MainLayout>
-                  } />
-                  <Route path="/settings" element={
-                    <MainLayout>
-                      <Settings />
-                    </MainLayout>
-                  } />
+                  <Route path="/" element={<MainLayout>{<Index />}</MainLayout>} />
+                  <Route path="/logs" element={<MainLayout>{<Logs />}</MainLayout>} />
+                  <Route path="/metrics" element={<MainLayout>{<Metrics />}</MainLayout>} />
+                  <Route path="/inventory" element={<MainLayout>{<Inventory />}</MainLayout>} />
+                  <Route path="/inventory/:serverId" element={<MainLayout>{<ServerDetail />}</MainLayout>} />
+                  <Route path="/security/groups" element={<MainLayout>{<SecurityGroups />}</MainLayout>} />
+                  <Route path="/security/events" element={<MainLayout>{<SecurityEvents />}</MainLayout>} />
+                  <Route path="/workflows" element={<MainLayout>{<Workflows />}</MainLayout>} />
+                  <Route path="/executions" element={<MainLayout>{<Executions />}</MainLayout>} />
+                  <Route path="/alerts" element={<MainLayout>{<Alerts />}</MainLayout>} />
+                  <Route path="/templates" element={<MainLayout>{<Templates />}</MainLayout>} />
+                  <Route path="/certificates" element={<MainLayout>{<Certificates />}</MainLayout>} />
+                  <Route path="/settings" element={<MainLayout>{<Settings />}</MainLayout>} />
                 </Route>
                 
                 {/* Route protégée pour les admins */}
                 <Route element={<ProtectedRoute requiredRole="admin" />}>
-                  <Route path="/admin" element={
-                    <MainLayout>
-                      <Admin />
-                    </MainLayout>
-                  } />
+                  <Route path="/admin" element={<MainLayout>{<Admin />}</MainLayout>} />
                 </Route>
                 
                 <Route path="*" element={<NotFound />} />
