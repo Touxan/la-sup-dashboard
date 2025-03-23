@@ -19,7 +19,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [userRole, setUserRole] = useState<UserRole>("user");
 
   useEffect(() => {
@@ -47,6 +47,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           console.log("User signed out");
           toast.info("Signed out");
         }
+        
+        setLoading(false);
       }
     );
 
@@ -60,6 +62,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         // Fetch user role from the database
         fetchUserRole(session.user.id);
       }
+      
+      setLoading(false);
     });
 
     return () => {
