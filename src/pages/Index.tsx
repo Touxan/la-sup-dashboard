@@ -123,7 +123,7 @@ const Index = () => {
         </MainLayout>
       </div>
     </SidebarProvider>
-  )
-}
+  );
+};
 
-export default Index
+export default Index;

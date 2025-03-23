@@ -1,10 +1,9 @@
-
 import { useState, useEffect } from "react";
 import { Link, Outlet, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Sidebar } from "@/components/ui/sidebar";
+import { Sidebar, useSidebar } from "@/components/ui/sidebar";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useIsMobile } from "@/hooks/use-mobile";
 import {
@@ -19,25 +18,29 @@ import {
   Play,
   Bell,
   FileCode,
-  Key, // Changed from Certificate to Key
+  Key,
   UserCog,
 } from "lucide-react";
 
-const MainLayout = () => {
+interface MainLayoutProps {
+  children: React.ReactNode;
+}
+
+const MainLayout = ({ children }: MainLayoutProps) => {
   const { user, signOut, userRole } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const isMobile = useIsMobile();
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const { isOpen, setIsOpen } = useSidebar();
 
   // Close sidebar on mobile by default
   useEffect(() => {
     if (isMobile) {
-      setSidebarOpen(false);
+      setIsOpen(false);
     } else {
-      setSidebarOpen(true);
+      setIsOpen(true);
     }
-  }, [isMobile]);
+  }, [isMobile, setIsOpen]);
 
   // Handle logout
   const handleLogout = async () => {
@@ -107,7 +110,7 @@ const MainLayout = () => {
     {
       name: "Certificates",
       path: "/certificates",
-      icon: <Key className="h-5 w-5" />, // Changed from Certificate to Key
+      icon: <Key className="h-5 w-5" />,
     },
     // Show Admin link only for admin users
     ...(userRole === "admin" ? [{
@@ -126,14 +129,14 @@ const MainLayout = () => {
     <div className="flex h-screen bg-background">
       {/* Sidebar */}
       <Sidebar
-        isOpen={sidebarOpen} 
-        onOpenChange={setSidebarOpen}
+        isOpen={isOpen} 
+        onOpenChange={setIsOpen}
         className="border-r"
       >
         <div className="flex h-14 items-center border-b px-4">
           <Link to="/" className="flex items-center gap-2 font-semibold">
             <Shield className="h-6 w-6" />
-            <span className={sidebarOpen ? "block" : "hidden"}>CloudAdmin</span>
+            <span className={isOpen ? "block" : "hidden"}>CloudAdmin</span>
           </Link>
         </div>
         <ScrollArea className="flex-1">
@@ -143,7 +146,7 @@ const MainLayout = () => {
                 <div key={index} className="space-y-1">
                   <div className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-muted-foreground">
                     {item.icon}
-                    <span className={sidebarOpen ? "block" : "hidden"}>
+                    <span className={isOpen ? "block" : "hidden"}>
                       {item.name}
                     </span>
                   </div>
@@ -158,7 +161,7 @@ const MainLayout = () => {
                             : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
                         }`}
                       >
-                        <span className={sidebarOpen ? "block" : "hidden"}>
+                        <span className={isOpen ? "block" : "hidden"}>
                           {subItem.name}
                         </span>
                       </Link>
@@ -176,7 +179,7 @@ const MainLayout = () => {
                   }`}
                 >
                   {item.icon}
-                  <span className={sidebarOpen ? "block" : "hidden"}>
+                  <span className={isOpen ? "block" : "hidden"}>
                     {item.name}
                   </span>
                 </Link>
@@ -191,7 +194,7 @@ const MainLayout = () => {
                 {user?.email?.charAt(0).toUpperCase() || "U"}
               </AvatarFallback>
             </Avatar>
-            {sidebarOpen && (
+            {isOpen && (
               <div className="flex-1 overflow-hidden">
                 <div className="truncate text-sm font-medium">
                   {user?.email || "Utilisateur"}
@@ -215,7 +218,7 @@ const MainLayout = () => {
 
       {/* Main content */}
       <div className="flex-1 overflow-auto">
-        <Outlet />
+        {children}
       </div>
     </div>
   );
