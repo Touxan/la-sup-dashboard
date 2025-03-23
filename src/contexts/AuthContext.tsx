@@ -9,7 +9,6 @@ type AuthContextType = {
   user: User | null;
   loading: boolean;
   signOut: () => Promise<void>;
-  userRole: string | null;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -18,34 +17,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  const [userRole, setUserRole] = useState<string | null>(null);
-
-  // Fetch user role whenever user changes
-  useEffect(() => {
-    const fetchUserRole = async () => {
-      if (!user) {
-        setUserRole(null);
-        return;
-      }
-      
-      try {
-        const { data, error } = await supabase
-          .from('profiles')
-          .select('role')
-          .eq('id', user.id)
-          .single();
-          
-        if (error) throw error;
-        
-        setUserRole(data.role);
-      } catch (error) {
-        console.error("Error fetching user role:", error);
-        setUserRole(null);
-      }
-    };
-    
-    fetchUserRole();
-  }, [user]);
 
   useEffect(() => {
     // Get initial session
@@ -67,10 +38,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (event === 'SIGNED_IN') {
           console.log("User signed in:", session?.user?.email);
           console.log("User details:", session?.user);
-          toast.success("Connexion réussie");
+          toast.success("Successfully signed in");
         } else if (event === 'SIGNED_OUT') {
           console.log("User signed out");
-          toast.info("Déconnexion réussie");
+          toast.info("Signed out");
         } else if (event === 'USER_UPDATED') {
           console.log("User updated:", session?.user);
         } else if (event === 'PASSWORD_RECOVERY') {
@@ -94,13 +65,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const { error } = await supabase.auth.signOut();
       if (error) {
         console.error("Error signing out:", error);
-        toast.error("Erreur lors de la déconnexion");
+        toast.error("Error signing out");
         throw error;
       }
       console.log("Sign out successful");
     } catch (error) {
       console.error("Exception during sign out:", error);
-      toast.error("Erreur lors de la déconnexion");
+      toast.error("Error signing out");
     }
   };
 
@@ -109,7 +80,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     user,
     loading,
     signOut,
-    userRole,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

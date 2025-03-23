@@ -111,39 +111,6 @@ export type Database = {
         }
         Relationships: []
       }
-      invitations: {
-        Row: {
-          created_at: string
-          created_by: string | null
-          email: string
-          expires_at: string
-          id: string
-          role: string
-          token: string
-          used: boolean
-        }
-        Insert: {
-          created_at?: string
-          created_by?: string | null
-          email: string
-          expires_at: string
-          id?: string
-          role?: string
-          token: string
-          used?: boolean
-        }
-        Update: {
-          created_at?: string
-          created_by?: string | null
-          email?: string
-          expires_at?: string
-          id?: string
-          role?: string
-          token?: string
-          used?: boolean
-        }
-        Relationships: []
-      }
       profiles: {
         Row: {
           avatar_url: string | null

@@ -1,232 +1,164 @@
 
-import { useState, useEffect } from "react";
-import { Link, useNavigate, useLocation } from "react-router-dom";
-import { useAuth } from "@/contexts/AuthContext";
-import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { useIsMobile } from "@/hooks/use-mobile";
+import { Menu, User, ChevronLeft, Server, Activity, Shield, Cog, Bell, LogOut } from "lucide-react"
+import { Link, useNavigate } from "react-router-dom"
+import { Button } from "@/components/ui/button"
+import { useAuth } from "@/contexts/AuthContext"
+import { toast } from "sonner"
 import {
-  LogOut,
-  Settings,
-  LayoutDashboard,
-  Scroll,
-  BarChart,
-  Server,
-  Shield,
-  AlarmClock,
-  Play,
-  Bell,
-  FileCode,
-  Key,
-  UserCog,
-  Menu,
-} from "lucide-react";
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarTrigger,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarGroupLabel,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarProvider,
+} from "@/components/ui/sidebar"
+import ChatBot from "@/components/ChatBot"
 
-interface MainLayoutProps {
-  children: React.ReactNode;
-}
+const menuItems = [
+  {
+    label: "Inventory",
+    icon: Server,
+    subItems: [
+      { label: "Servers", href: "/inventory/servers" },
+      { label: "Networks", href: "/inventory/networks" },
+      { label: "Storage", href: "" },
+      { label: "Load Balancers", href: "#" },
+    ],
+  },
+  {
+    label: "Monitoring",
+    icon: Activity,
+    subItems: [
+      { label: "Metrics", href: "/monitoring/metrics" },
+      { label: "Logs", href: "/monitoring/logs" },
+      { label: "Alerts", href: "/monitoring/alerts" },
+    ],
+  },
+  {
+    label: "Security",
+    icon: Shield,
+    subItems: [
+      { label: "Events", href: "/security/events" },
+      { label: "Certificates", href: "/security/certificates" },
+      { label: "Security Groups", href: "/security/groups" },
+    ],
+  },
+  {
+    label: "Automation",
+    icon: Cog,
+    subItems: [
+      { label: "Workflows", href: "/automation/workflows" },
+      { label: "Executions", href: "/automation/executions" },
+      { label: "Templates", href: "/automation/templates" },
+    ],
+  },
+]
 
-const MainLayout = ({ children }: MainLayoutProps) => {
-  const { user, signOut, userRole } = useAuth();
+const MainLayout = ({ children }: { children: React.ReactNode }) => {
+  const { signOut, user } = useAuth();
   const navigate = useNavigate();
-  const location = useLocation();
-  const isMobile = useIsMobile();
-  const [isOpen, setIsOpen] = useState(!isMobile);
-
-  // Close sidebar on mobile by default
-  useEffect(() => {
-    if (isMobile) {
-      setIsOpen(false);
-    } else {
-      setIsOpen(true);
-    }
-  }, [isMobile]);
-
-  // Handle logout
-  const handleLogout = async () => {
+  
+  const handleSignOut = async () => {
     try {
       await signOut();
+      toast.success("Signed out successfully");
       navigate("/auth");
     } catch (error) {
-      console.error("Error signing out:", error);
+      toast.error("Error signing out");
     }
   };
 
-  const navItems = [
-    {
-      name: "Dashboard",
-      path: "/",
-      icon: <LayoutDashboard className="h-5 w-5" />,
-    },
-    {
-      name: "Logs",
-      path: "/logs",
-      icon: <Scroll className="h-5 w-5" />,
-    },
-    {
-      name: "Metrics",
-      path: "/metrics",
-      icon: <BarChart className="h-5 w-5" />,
-    },
-    {
-      name: "Inventory",
-      path: "/inventory",
-      icon: <Server className="h-5 w-5" />,
-    },
-    {
-      name: "Security",
-      icon: <Shield className="h-5 w-5" />,
-      items: [
-        {
-          name: "Security Groups",
-          path: "/security/groups",
-        },
-        {
-          name: "Security Events",
-          path: "/security/events",
-        },
-      ],
-    },
-    {
-      name: "Workflows",
-      path: "/workflows",
-      icon: <AlarmClock className="h-5 w-5" />,
-    },
-    {
-      name: "Executions",
-      path: "/executions",
-      icon: <Play className="h-5 w-5" />,
-    },
-    {
-      name: "Alerts",
-      path: "/alerts",
-      icon: <Bell className="h-5 w-5" />,
-    },
-    {
-      name: "Templates",
-      path: "/templates",
-      icon: <FileCode className="h-5 w-5" />,
-    },
-    {
-      name: "Certificates",
-      path: "/certificates",
-      icon: <Key className="h-5 w-5" />,
-    },
-    // Show Admin link only for admin users
-    ...(userRole === "admin" ? [{
-      name: "Administration",
-      path: "/admin",
-      icon: <UserCog className="h-5 w-5" />,
-    }] : []),
-    {
-      name: "Settings",
-      path: "/settings",
-      icon: <Settings className="h-5 w-5" />,
-    },
-  ];
-
   return (
-    <div className="flex h-screen bg-background">
-      {/* Sidebar */}
-      <div
-        className={`flex h-full flex-col overflow-hidden border-r transition-all duration-300 ease-in-out ${
-          isOpen ? "w-64" : "w-16"
-        }`}
-      >
-        <div className="flex h-14 items-center border-b px-4">
-          <Link to="/" className="flex items-center gap-2 font-semibold">
-            <Shield className="h-6 w-6" />
-            <span className={isOpen ? "block" : "hidden"}>CloudAdmin</span>
-          </Link>
-          <div className="ml-auto">
-            <Button variant="ghost" size="icon" onClick={() => setIsOpen(!isOpen)}>
-              <Menu className="h-5 w-5" />
-            </Button>
+    <SidebarProvider defaultOpen={true}>
+      <div className="flex min-h-screen w-full">
+        <Sidebar className="border-r border-border">
+          <div className="p-4 flex items-center gap-2">
+            <SidebarTrigger>
+              <ChevronLeft className="h-4 w-4" />
+            </SidebarTrigger>
+            <Link to="/" className="font-semibold hover:text-primary transition-colors">
+              la-sup
+            </Link>
           </div>
-        </div>
-        <ScrollArea className="flex-1">
-          <nav className="flex flex-col gap-1 p-2">
-            {navItems.map((item, index) =>
-              "items" in item ? (
-                <div key={index} className="space-y-1">
-                  <div className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-muted-foreground">
-                    {item.icon}
-                    <span className={isOpen ? "block" : "hidden"}>
-                      {item.name}
-                    </span>
-                  </div>
-                  <div className="space-y-1 ml-6">
-                    {item.items.map((subItem, subIndex) => (
-                      <Link
-                        key={subIndex}
-                        to={subItem.path}
-                        className={`flex items-center gap-2 rounded-md px-3 py-1.5 text-sm transition-colors ${
-                          location.pathname === subItem.path
-                            ? "bg-accent text-accent-foreground"
-                            : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
-                        }`}
-                      >
-                        <span className={isOpen ? "block" : "hidden"}>
-                          {subItem.name}
-                        </span>
-                      </Link>
-                    ))}
-                  </div>
-                </div>
-              ) : (
-                <Link
-                  key={index}
-                  to={item.path}
-                  className={`flex items-center gap-2 rounded-md px-3 py-1.5 text-sm transition-colors ${
-                    location.pathname === item.path
-                      ? "bg-accent text-accent-foreground"
-                      : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
-                  }`}
-                >
-                  {item.icon}
-                  <span className={isOpen ? "block" : "hidden"}>
-                    {item.name}
-                  </span>
-                </Link>
-              )
-            )}
-          </nav>
-        </ScrollArea>
-        <div className="mt-auto border-t p-2">
-          <div className="flex items-center gap-2 rounded-md p-2">
-            <Avatar className="h-8 w-8">
-              <AvatarFallback>
-                {user?.email?.charAt(0).toUpperCase() || "U"}
-              </AvatarFallback>
-            </Avatar>
-            {isOpen && (
-              <div className="flex-1 overflow-hidden">
-                <div className="truncate text-sm font-medium">
-                  {user?.email || "Utilisateur"}
-                </div>
-                <div className="truncate text-xs text-muted-foreground">
-                  {userRole || "Rôle non défini"}
-                </div>
-              </div>
-            )}
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={handleLogout}
-              title="Se déconnecter"
-            >
-              <LogOut className="h-5 w-5" />
-            </Button>
-          </div>
-        </div>
-      </div>
+          <SidebarContent>
+            <SidebarGroup>
+              <SidebarGroupLabel>Navigation</SidebarGroupLabel>
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  {menuItems.map((item) => (
+                    <SidebarMenuItem key={item.label}>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <SidebarMenuButton>
+                            <item.icon className="w-4 h-4" />
+                            <span>{item.label}</span>
+                          </SidebarMenuButton>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent side="right" className="w-48">
+                          {item.subItems.map((subItem) => (
+                            <DropdownMenuItem key={subItem.label} asChild>
+                              <Link to={subItem.href}>{subItem.label}</Link>
+                            </DropdownMenuItem>
+                          ))}
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </SidebarMenuItem>
+                  ))}
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+          </SidebarContent>
+        </Sidebar>
 
-      {/* Main content */}
-      <div className="flex-1 overflow-auto">
-        {children}
+        <div className="flex-1 flex flex-col min-h-screen overflow-y-auto">
+          <header className="h-14 border-b border-border px-6 flex items-center justify-between sticky top-0 z-10 bg-background">
+            <div className="flex items-center gap-4">
+              <SidebarTrigger>
+                <Menu className="h-5 w-5" />
+              </SidebarTrigger>
+            </div>
+
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" className="rounded-full">
+                  <User className="w-5 h-5" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuLabel>{user?.email || 'My Account'}</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem asChild>
+                  <Link to="/myaccount/settings">Settings</Link>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={handleSignOut}>
+                  <LogOut className="mr-2 h-4 w-4" />
+                  Sign Out
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </header>
+
+          <main className="flex-1 relative">
+            {children}
+          </main>
+        </div>
       </div>
-    </div>
+      
+      <ChatBot />
+    </SidebarProvider>
   );
 };
 
