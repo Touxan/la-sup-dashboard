@@ -1,4 +1,3 @@
-
 import { Menu, User, ChevronLeft, Server, Activity, Shield, Cog, Bell, LogOut } from "lucide-react"
 import { Link, useNavigate } from "react-router-dom"
 import { Button } from "@/components/ui/button"
@@ -70,13 +69,12 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
   const { signOut, user, userRole } = useAuth();
   const navigate = useNavigate();
   
-  console.log("Current user role in MainLayout:", userRole);
+  console.log("MainLayout - Current user role:", userRole);
   
   const handleSignOut = async () => {
     try {
       await signOut();
       toast.success("Signed out successfully");
-      navigate("/auth");
     } catch (error) {
       toast.error("Error signing out");
     }

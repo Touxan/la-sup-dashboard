@@ -21,7 +21,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [userRole, setUserRole] = useState<UserRole>("user");
-  const [initializationAttempted, setInitializationAttempted] = useState(false);
 
   useEffect(() => {
     console.log("Setting up auth state listener");
@@ -29,8 +28,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     
     async function initializeAuth() {
       try {
-        if (!mounted) return;
-
         // First set up auth state listener
         const { data: { subscription } } = supabase.auth.onAuthStateChange(
           async (event, currentSession) => {
@@ -50,10 +47,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             }
             
             if (event === 'SIGNED_IN') {
-              console.log("User signed in:", currentSession?.user?.email);
               toast.success("Successfully signed in");
             } else if (event === 'SIGNED_OUT') {
-              console.log("User signed out");
               toast.info("Signed out");
               setLoading(false);
             }
@@ -63,12 +58,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         // Then check for existing session
         const { data: { session: initialSession }, error } = await supabase.auth.getSession();
         
-        if (!mounted) return;
-        
         if (error) {
           console.error("Error getting session:", error);
           setLoading(false);
-          setInitializationAttempted(true);
           return;
         }
         
@@ -83,9 +75,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setLoading(false);
         }
         
-        // Mark initialization as attempted even if there's no session
-        setInitializationAttempted(true);
-        
         return () => {
           mounted = false;
           subscription.unsubscribe();
@@ -94,21 +83,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         console.error("Auth initialization error:", error);
         if (mounted) {
           setLoading(false);
-          setInitializationAttempted(true);
         }
       }
     }
     
+    // Initialize auth and ensure loading state is eventually cleared
     initializeAuth();
     
-    // Added a timeout to ensure loading state doesn't hang indefinitely
+    // Failsafe timeout to prevent indefinite loading
     const timeoutId = setTimeout(() => {
-      if (mounted && loading && !initializationAttempted) {
+      if (mounted && loading) {
         console.log("Auth initialization timed out - forcing loading to false");
         setLoading(false);
-        setInitializationAttempted(true);
       }
-    }, 5000); // 5 second timeout
+    }, 3000); // 3 second timeout
     
     return () => {
       mounted = false;
@@ -132,25 +120,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       
       if (data) {
         console.log("User role found:", data.role);
-        // Ensure we're processing the role correctly
         if (data.role === 'admin' || data.role === 'user' || data.role === 'viewer') {
           setUserRole(data.role as UserRole);
-          console.log("User role set to:", data.role);
         } else {
           console.error("Unexpected role format:", data.role);
-          setUserRole("user"); // Default to user if unexpected format
+          setUserRole("user");
         }
       } else {
         console.log("No user role found, defaulting to 'user'");
         setUserRole("user");
       }
     } catch (error) {
-      console.error("Error fetching user role:", error);
-      // Default to user role if there's an error
+      console.error("Exception fetching user role:", error);
       setUserRole("user");
     } finally {
       setLoading(false);
-      setInitializationAttempted(true);
     }
   };
 
@@ -159,13 +143,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       console.log("Starting sign out process");
       setLoading(true);
       const { error } = await supabase.auth.signOut();
-      if (error) {
-        console.error("Error signing out:", error);
-        toast.error("Error signing out");
-        throw error;
-      }
+      if (error) throw error;
+      
       console.log("Sign out successful");
-      // Force navigation to auth page
+      setUser(null);
+      setSession(null);
+      setUserRole("user");
+      
+      // Use a regular redirect instead of navigate to ensure complete reset
       window.location.href = "/auth";
     } catch (error) {
       console.error("Exception during sign out:", error);

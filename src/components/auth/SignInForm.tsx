@@ -29,8 +29,9 @@ const SignInForm = () => {
         throw error;
       }
       
-      console.log("Sign in successful, navigating to home");
-      navigate("/");
+      console.log("Sign in successful, user:", data.user?.id);
+      
+      // The redirect will be handled by the AuthPage component
     } catch (error: any) {
       console.error("Sign in error:", error);
       

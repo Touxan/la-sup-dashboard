@@ -31,7 +31,7 @@ const ProtectedRoute = () => {
   
   // If trying to access admin route without admin role
   if (isAdminRoute && userRole !== "admin") {
-    console.log("User role:", userRole, "- Not authorized for admin route, redirecting to /");
+    console.log("Not authorized for admin route, redirecting to /");
     return <Navigate to="/" replace />;
   }
 

@@ -13,17 +13,21 @@ const AuthPage = () => {
   const location = useLocation();
   const { user, loading } = useAuth();
   const [activeTab, setActiveTab] = useState("login");
-  const [redirectAttempted, setRedirectAttempted] = useState(false);
+  const [redirecting, setRedirecting] = useState(false);
   
   useEffect(() => {
-    // Only redirect if we have a user and loading is false
-    if (user && !loading && !redirectAttempted) {
-      setRedirectAttempted(true);
+    // Only redirect if we have a user and loading is false and we're not already redirecting
+    if (user && !loading && !redirecting) {
+      setRedirecting(true);
       const from = location.state?.from?.pathname || "/";
       console.log("User is authenticated, redirecting to:", from);
-      navigate(from, { replace: true });
+      
+      // Small timeout to prevent redirect loops
+      setTimeout(() => {
+        navigate(from, { replace: true });
+      }, 100);
     }
-  }, [user, loading, navigate, location, redirectAttempted]);
+  }, [user, loading, navigate, location, redirecting]);
 
   // Show loading while authentication status is being checked
   if (loading) {
