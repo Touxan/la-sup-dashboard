@@ -79,7 +79,7 @@ const Administration = () => {
     try {
       setLoading(true);
       
-      // Fetch users from the new users table
+      // Fetch users from the users table
       const { data, error } = await supabase
         .from('users')
         .select('*')
