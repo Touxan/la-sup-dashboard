@@ -1,3 +1,4 @@
+
 import { Menu, User, ChevronLeft, Server, Activity, Shield, Cog, Bell, LogOut } from "lucide-react"
 import { Link, useNavigate } from "react-router-dom"
 import { Button } from "@/components/ui/button"
@@ -72,9 +73,10 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
   console.log("MainLayout - Current user role:", userRole);
   
   const handleSignOut = async () => {
+    console.log("Sign out clicked");
     try {
       await signOut();
-      toast.success("Signed out successfully");
+      // Note: No need to navigate here as the signOut function already forces a redirect
     } catch (error) {
       toast.error("Error signing out");
     }

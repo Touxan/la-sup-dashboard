@@ -3,6 +3,7 @@ import { createContext, useContext, useEffect, useState, ReactNode } from "react
 import { supabase } from "@/integrations/supabase/client";
 import type { Session, User } from "@supabase/supabase-js";
 import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
 
 type UserRole = "admin" | "user" | "viewer";
 
@@ -52,6 +53,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             } else if (event === 'SIGNED_OUT') {
               toast.info("Signed out");
               setLoading(false);
+              // Force redirect to auth page on sign out
+              window.location.href = "/auth";
             }
           }
         );
@@ -153,7 +156,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setSession(null);
       setUserRole("user");
       
-      // Force redirect to auth page
+      // Force redirect to auth page - using window.location.href ensures a complete page refresh
       window.location.href = "/auth";
     } catch (error) {
       console.error("Exception during sign out:", error);
