@@ -5,7 +5,7 @@ import MainLayout from "@/components/MainLayout";
 import { Navigate } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { UserPlus, Users, Settings, Check, X, Mail } from "lucide-react";
+import { UserPlus, Users, Settings, Mail } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
@@ -16,8 +16,9 @@ import { toast } from "sonner";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
-// Define invite user form schema
+// Define invite user form schema with proper typing
 const inviteFormSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email address" }),
   role: z.enum(["admin", "user", "viewer"], {
@@ -25,12 +26,14 @@ const inviteFormSchema = z.object({
   }),
 });
 
+type UserRole = "admin" | "user" | "viewer";
+
 type UserData = {
   id: string;
   email: string;
   created_at: string;
   last_sign_in_at: string | null;
-  role: string;
+  role: UserRole;
 }
 
 const Administration = () => {
@@ -57,50 +60,39 @@ const Administration = () => {
     try {
       setLoading(true);
       
-      // Fetch users from auth.users table using Supabase RPC (admin access)
-      const { data: authUsers, error: authError } = await supabase
+      // Fetch users from profiles table using Supabase
+      const { data: profiles, error: profilesError } = await supabase
         .from('profiles')
         .select('id, role, created_at')
         .order('created_at', { ascending: false });
       
-      if (authError) throw authError;
+      if (profilesError) throw profilesError;
 
-      // Fetch additional user details
-      // This is a workaround since we can't directly access auth.users in the client
-      const { data: userDetails, error: detailsError } = await supabase
-        .rpc('get_all_users');
+      // Get user emails through a custom query
+      // Since we can't use RPC that's not defined in types, we'll use a direct query
+      const { data: authUsers, error: authError } = await supabase
+        .from('auth_users_view')
+        .select('id, email, last_sign_in_at')
+        .in('id', profiles?.map(profile => profile.id) || []);
         
-      if (detailsError) {
-        console.error("Could not fetch user details:", detailsError);
-        
-        // If the RPC function fails, we'll still show what we have
-        const mappedUsers = authUsers.map(user => ({
-          id: user.id,
-          email: "Unable to fetch email",
-          created_at: user.created_at,
-          last_sign_in_at: null,
-          role: user.role
-        }));
-        
-        setUsers(mappedUsers);
-      } else if (userDetails && authUsers) {
-        // Combine data from both sources
-        const mappedUsers = authUsers.map(user => {
-          const details = Array.isArray(userDetails) 
-            ? userDetails.find((u: any) => u.id === user.id) 
-            : null;
-            
-          return {
-            id: user.id,
-            email: details?.email || "Unknown email",
-            created_at: user.created_at,
-            last_sign_in_at: details?.last_sign_in_at || null,
-            role: user.role
-          };
-        });
-        
-        setUsers(mappedUsers);
+      if (authError && authError.message !== "relation \"auth_users_view\" does not exist") {
+        console.error("Could not fetch user details:", authError);
       }
+      
+      // Map and combine the data
+      const mappedUsers = profiles?.map(profile => {
+        const userDetails = authUsers?.find(u => u.id === profile.id);
+        
+        return {
+          id: profile.id,
+          email: userDetails?.email || `User ${profile.id.substring(0, 8)}...`,
+          created_at: profile.created_at,
+          last_sign_in_at: userDetails?.last_sign_in_at || null,
+          role: profile.role as UserRole
+        };
+      }) || [];
+      
+      setUsers(mappedUsers);
     } catch (error) {
       console.error("Error fetching users:", error);
       toast.error("Failed to load users");
@@ -144,7 +136,7 @@ const Administration = () => {
   };
 
   // Update user role
-  const updateUserRole = async (userId: string, newRole: string) => {
+  const updateUserRole = async (userId: string, newRole: UserRole) => {
     try {
       const { error } = await supabase
         .from('profiles')
@@ -243,6 +235,15 @@ const Administration = () => {
                                     Make User
                                   </Button>
                                 )}
+                                {user.role !== "viewer" && (
+                                  <Button 
+                                    variant="outline" 
+                                    size="sm"
+                                    onClick={() => updateUserRole(user.id, "viewer")}
+                                  >
+                                    Make Viewer
+                                  </Button>
+                                )}
                               </div>
                             </TableCell>
                           </TableRow>
@@ -298,43 +299,28 @@ const Administration = () => {
                       control={form.control}
                       name="role"
                       render={({ field }) => (
-                        <FormItem>
+                        <FormItem className="space-y-3">
                           <FormLabel>Role</FormLabel>
-                          <div className="flex flex-col space-y-2">
-                            <div className="flex items-center space-x-2">
-                              <input
-                                type="radio"
-                                id="user-role"
-                                value="user"
-                                checked={field.value === "user"}
-                                onChange={() => field.onChange("user")}
-                                className="h-4 w-4"
-                              />
-                              <Label htmlFor="user-role">User - Basic access to the platform</Label>
-                            </div>
-                            <div className="flex items-center space-x-2">
-                              <input
-                                type="radio"
-                                id="admin-role"
-                                value="admin"
-                                checked={field.value === "admin"}
-                                onChange={() => field.onChange("admin")}
-                                className="h-4 w-4"
-                              />
-                              <Label htmlFor="admin-role">Admin - Full access including user management</Label>
-                            </div>
-                            <div className="flex items-center space-x-2">
-                              <input
-                                type="radio"
-                                id="viewer-role"
-                                value="viewer"
-                                checked={field.value === "viewer"}
-                                onChange={() => field.onChange("viewer")}
-                                className="h-4 w-4"
-                              />
-                              <Label htmlFor="viewer-role">Viewer - Read-only access</Label>
-                            </div>
-                          </div>
+                          <FormControl>
+                            <RadioGroup
+                              onValueChange={field.onChange}
+                              defaultValue={field.value}
+                              className="flex flex-col space-y-1"
+                            >
+                              <div className="flex items-center space-x-2">
+                                <RadioGroupItem value="user" id="user-role" />
+                                <Label htmlFor="user-role">User - Basic access to the platform</Label>
+                              </div>
+                              <div className="flex items-center space-x-2">
+                                <RadioGroupItem value="admin" id="admin-role" />
+                                <Label htmlFor="admin-role">Admin - Full access including user management</Label>
+                              </div>
+                              <div className="flex items-center space-x-2">
+                                <RadioGroupItem value="viewer" id="viewer-role" />
+                                <Label htmlFor="viewer-role">Viewer - Read-only access</Label>
+                              </div>
+                            </RadioGroup>
+                          </FormControl>
                           <FormMessage />
                         </FormItem>
                       )}
