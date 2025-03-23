@@ -6,6 +6,8 @@ const ProtectedRoute = () => {
   const { user, loading } = useAuth();
   const location = useLocation();
 
+  console.log("ProtectedRoute - loading:", loading, "user:", user ? "exists" : "null");
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -16,9 +18,11 @@ const ProtectedRoute = () => {
   }
 
   if (!user) {
+    console.log("No user, redirecting to /auth");
     return <Navigate to="/auth" state={{ from: location }} replace />;
   }
 
+  console.log("User authenticated, rendering outlet");
   return <Outlet />;
 };
 

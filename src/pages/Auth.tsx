@@ -21,8 +21,10 @@ const Auth = () => {
 
   // Redirect to home if already logged in
   useEffect(() => {
+    console.log("Auth page - user:", user ? "exists" : "null");
     if (user) {
       const from = location.state?.from?.pathname || "/";
+      console.log("User is authenticated, redirecting to:", from);
       navigate(from, { replace: true });
     }
   }, [user, navigate, location]);

@@ -23,6 +23,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [userRole, setUserRole] = useState<UserRole>("user");
 
   useEffect(() => {
+    console.log("Setting up auth state listener");
+    
     // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
@@ -70,6 +72,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const fetchUserRole = async (userId: string) => {
     try {
+      console.log("Fetching user role for:", userId);
       const { data, error } = await supabase
         .from('users')
         .select('role')
@@ -77,10 +80,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         .single();
       
       if (error) {
+        console.error("Error fetching user role:", error);
         throw error;
       }
       
       if (data) {
+        console.log("User role found:", data.role);
         setUserRole(data.role as UserRole);
       }
     } catch (error) {
@@ -88,6 +93,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Default to user role if there's an error
       setUserRole("user");
     } finally {
+      console.log("Setting loading to false");
       setLoading(false);
     }
   };
@@ -95,6 +101,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signOut = async () => {
     try {
       console.log("Starting sign out process");
+      setLoading(true);
       const { error } = await supabase.auth.signOut();
       if (error) {
         console.error("Error signing out:", error);
@@ -105,6 +112,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch (error) {
       console.error("Exception during sign out:", error);
       toast.error("Error signing out");
+    } finally {
+      setLoading(false);
     }
   };
 
