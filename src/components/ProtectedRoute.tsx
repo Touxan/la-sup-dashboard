@@ -9,7 +9,7 @@ const ProtectedRoute = () => {
   const location = useLocation();
   
   console.log("ProtectedRoute - user:", user ? "exists" : "null", "loading:", loading, "userRole:", userRole);
-  console.log("Current path:", location.pathname);
+  console.log("Current path:", location.pathname, "isAdminRoute:", location.pathname.startsWith("/administration"));
   
   // Add effect to detect stale authentication states
   useEffect(() => {
