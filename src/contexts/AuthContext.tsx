@@ -115,7 +115,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       
       if (data) {
         console.log("User role found:", data.role);
-        setUserRole(data.role as UserRole);
+        // Ensure we're processing the role correctly
+        if (data.role === 'admin' || data.role === 'user' || data.role === 'viewer') {
+          setUserRole(data.role as UserRole);
+          console.log("User role set to:", data.role);
+        } else {
+          console.error("Unexpected role format:", data.role);
+          setUserRole("user"); // Default to user if unexpected format
+        }
+      } else {
+        console.log("No user role found, defaulting to 'user'");
+        setUserRole("user");
       }
     } catch (error) {
       console.error("Error fetching user role:", error);

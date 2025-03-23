@@ -70,6 +70,8 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
   const { signOut, user, userRole } = useAuth();
   const navigate = useNavigate();
   
+  console.log("Current user role in MainLayout:", userRole);
+  
   const handleSignOut = async () => {
     try {
       await signOut();

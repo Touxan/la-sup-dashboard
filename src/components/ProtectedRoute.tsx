@@ -4,11 +4,15 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Loader2 } from "lucide-react";
 
 const ProtectedRoute = () => {
-  const { user, loading } = useAuth();
+  const { user, loading, userRole } = useAuth();
   const location = useLocation();
-
-  console.log("ProtectedRoute - user:", user ? "exists" : "null", "loading:", loading);
-
+  
+  console.log("ProtectedRoute - user:", user ? "exists" : "null", "loading:", loading, "userRole:", userRole);
+  console.log("Current path:", location.pathname);
+  
+  // Check if current path is an admin-only route
+  const isAdminRoute = location.pathname.includes("/administration");
+  
   // Show loading spinner while checking authentication
   if (loading) {
     return (
@@ -19,12 +23,19 @@ const ProtectedRoute = () => {
     );
   }
 
+  // If not authenticated, redirect to auth page
   if (!user) {
     console.log("No user, redirecting to /auth");
     return <Navigate to="/auth" state={{ from: location }} replace />;
   }
+  
+  // If trying to access admin route without admin role
+  if (isAdminRoute && userRole !== "admin") {
+    console.log("User role:", userRole, "- Not authorized for admin route, redirecting to /");
+    return <Navigate to="/" replace />;
+  }
 
-  console.log("User authenticated, rendering outlet");
+  console.log("User authenticated with role:", userRole, "rendering outlet");
   return <Outlet />;
 };
 
