@@ -24,50 +24,78 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     console.log("Setting up auth state listener");
+    let mounted = true;
     
-    // Set up auth state listener FIRST
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        console.log("Auth state changed:", event, session ? "Session exists" : "No session");
-        setSession(session);
-        setUser(session?.user ?? null);
+    async function initializeAuth() {
+      try {
+        // Set up auth state listener FIRST
+        const { data: { subscription } } = supabase.auth.onAuthStateChange(
+          async (event, currentSession) => {
+            console.log("Auth state changed:", event, currentSession ? "Session exists" : "No session");
+            
+            if (!mounted) return;
+            
+            setSession(currentSession);
+            setUser(currentSession?.user ?? null);
+            
+            if (currentSession?.user) {
+              // Fetch user role from the database
+              await fetchUserRole(currentSession.user.id);
+            } else {
+              setUserRole("user");
+              setLoading(false);
+            }
+            
+            if (event === 'SIGNED_IN') {
+              console.log("User signed in:", currentSession?.user?.email);
+              console.log("User details:", currentSession?.user);
+              toast.success("Successfully signed in");
+            } else if (event === 'SIGNED_OUT') {
+              console.log("User signed out");
+              toast.info("Signed out");
+              setLoading(false);
+            }
+          }
+        );
+
+        // THEN check for existing session
+        const { data: { session: initialSession }, error } = await supabase.auth.getSession();
         
-        if (session?.user) {
+        if (!mounted) return;
+        
+        if (error) {
+          console.error("Error getting session:", error);
+          setLoading(false);
+          return;
+        }
+        
+        console.log("Initial auth session:", initialSession ? "Authenticated" : "Not authenticated");
+        setSession(initialSession);
+        setUser(initialSession?.user ?? null);
+        
+        if (initialSession?.user) {
           // Fetch user role from the database
-          await fetchUserRole(session.user.id);
+          await fetchUserRole(initialSession.user.id);
         } else {
-          setUserRole("user");
+          setLoading(false);
         }
         
-        if (event === 'SIGNED_IN') {
-          console.log("User signed in:", session?.user?.email);
-          console.log("User details:", session?.user);
-          toast.success("Successfully signed in");
-        } else if (event === 'SIGNED_OUT') {
-          console.log("User signed out");
-          toast.info("Signed out");
+        return () => {
+          mounted = false;
+          subscription.unsubscribe();
+        };
+      } catch (error) {
+        console.error("Auth initialization error:", error);
+        if (mounted) {
+          setLoading(false);
         }
-        
-        setLoading(false);
       }
-    );
-
-    // THEN check for existing session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      console.log("Initial auth session:", session ? "Authenticated" : "Not authenticated");
-      setSession(session);
-      setUser(session?.user ?? null);
-      
-      if (session?.user) {
-        // Fetch user role from the database
-        fetchUserRole(session.user.id);
-      } else {
-        setLoading(false);
-      }
-    });
-
+    }
+    
+    initializeAuth();
+    
     return () => {
-      subscription.unsubscribe();
+      mounted = false;
     };
   }, []);
 
@@ -89,11 +117,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         console.log("User role found:", data.role);
         setUserRole(data.role as UserRole);
       }
-      setLoading(false);
     } catch (error) {
       console.error("Error fetching user role:", error);
       // Default to user role if there's an error
       setUserRole("user");
+    } finally {
       setLoading(false);
     }
   };
