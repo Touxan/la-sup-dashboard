@@ -9,72 +9,6 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      api_key_permissions: {
-        Row: {
-          action: Database["public"]["Enums"]["permission_action"]
-          api_key_id: string
-          id: string
-          resource_id: string
-        }
-        Insert: {
-          action: Database["public"]["Enums"]["permission_action"]
-          api_key_id: string
-          id?: string
-          resource_id: string
-        }
-        Update: {
-          action?: Database["public"]["Enums"]["permission_action"]
-          api_key_id?: string
-          id?: string
-          resource_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "api_key_permissions_api_key_id_fkey"
-            columns: ["api_key_id"]
-            isOneToOne: false
-            referencedRelation: "api_keys"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "api_key_permissions_resource_id_fkey"
-            columns: ["resource_id"]
-            isOneToOne: false
-            referencedRelation: "resources"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      api_keys: {
-        Row: {
-          created_at: string
-          expires_at: string | null
-          id: string
-          is_active: boolean
-          key: string
-          name: string
-          user_id: string
-        }
-        Insert: {
-          created_at?: string
-          expires_at?: string | null
-          id?: string
-          is_active?: boolean
-          key: string
-          name: string
-          user_id: string
-        }
-        Update: {
-          created_at?: string
-          expires_at?: string | null
-          id?: string
-          is_active?: boolean
-          key?: string
-          name?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
       data_sources: {
         Row: {
           config: Json | null
@@ -227,38 +161,6 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
-      }
-      user_permissions: {
-        Row: {
-          action: Database["public"]["Enums"]["permission_action"]
-          created_at: string
-          id: string
-          resource_id: string
-          user_id: string
-        }
-        Insert: {
-          action: Database["public"]["Enums"]["permission_action"]
-          created_at?: string
-          id?: string
-          resource_id: string
-          user_id: string
-        }
-        Update: {
-          action?: Database["public"]["Enums"]["permission_action"]
-          created_at?: string
-          id?: string
-          resource_id?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "user_permissions_resource_id_fkey"
-            columns: ["resource_id"]
-            isOneToOne: false
-            referencedRelation: "resources"
-            referencedColumns: ["id"]
-          },
-        ]
       }
     }
     Views: {

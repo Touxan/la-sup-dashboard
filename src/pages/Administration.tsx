@@ -17,6 +17,23 @@ import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 // Define invite user form schema with proper typing
 const inviteFormSchema = z.object({
@@ -31,6 +48,7 @@ type UserRole = "admin" | "user" | "viewer";
 type UserData = {
   id: string;
   email: string;
+  full_name: string;
   created_at: string;
   last_sign_in_at: string | null;
   role: UserRole;
@@ -40,6 +58,7 @@ const Administration = () => {
   const { userRole } = useAuth();
   const [users, setUsers] = useState<UserData[]>([]);
   const [loading, setLoading] = useState(true);
+  const [roleChangeDialog, setRoleChangeDialog] = useState<{open: boolean, userId: string, newRole: UserRole} | null>(null);
 
   // Redirect non-admin users
   if (userRole !== "admin") {
@@ -63,31 +82,20 @@ const Administration = () => {
       // Fetch users from profiles table using Supabase
       const { data: profiles, error: profilesError } = await supabase
         .from('profiles')
-        .select('id, role, created_at')
+        .select('id, role, full_name, created_at')
         .order('created_at', { ascending: false });
       
       if (profilesError) throw profilesError;
 
-      // Get user emails through a custom query
-      // Since we can't use RPC that's not defined in types, we'll use a direct query
-      const { data: authUsers, error: authError } = await supabase
-        .from('auth_users_view')
-        .select('id, email, last_sign_in_at')
-        .in('id', profiles?.map(profile => profile.id) || []);
-        
-      if (authError && authError.message !== "relation \"auth_users_view\" does not exist") {
-        console.error("Could not fetch user details:", authError);
-      }
-      
-      // Map and combine the data
+      // Since we don't have direct access to auth.users through the client,
+      // We'll use what we have in the profiles table
       const mappedUsers = profiles?.map(profile => {
-        const userDetails = authUsers?.find(u => u.id === profile.id);
-        
         return {
           id: profile.id,
-          email: userDetails?.email || `User ${profile.id.substring(0, 8)}...`,
+          email: profile.id.substring(0, 8) + '...', // Abbreviated ID as placeholder
+          full_name: profile.full_name || 'Unknown',
           created_at: profile.created_at,
-          last_sign_in_at: userDetails?.last_sign_in_at || null,
+          last_sign_in_at: null, // We don't have this in profiles
           role: profile.role as UserRole
         };
       }) || [];
@@ -135,9 +143,22 @@ const Administration = () => {
     }
   };
 
-  // Update user role
-  const updateUserRole = async (userId: string, newRole: UserRole) => {
+  // Open confirmation dialog before updating user role
+  const confirmRoleChange = (userId: string, newRole: UserRole) => {
+    setRoleChangeDialog({
+      open: true,
+      userId,
+      newRole
+    });
+  };
+
+  // Update user role after confirmation
+  const updateUserRole = async () => {
+    if (!roleChangeDialog) return;
+    
     try {
+      const { userId, newRole } = roleChangeDialog;
+      
       const { error } = await supabase
         .from('profiles')
         .update({ role: newRole })
@@ -151,6 +172,8 @@ const Administration = () => {
     } catch (error) {
       console.error("Error updating user role:", error);
       toast.error("Failed to update user role");
+    } finally {
+      setRoleChangeDialog(null);
     }
   };
 
@@ -200,7 +223,8 @@ const Administration = () => {
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead>Email</TableHead>
+                        <TableHead>Full Name</TableHead>
+                        <TableHead>Email/ID</TableHead>
                         <TableHead>Role</TableHead>
                         <TableHead>Created</TableHead>
                         <TableHead>Last Sign In</TableHead>
@@ -211,46 +235,33 @@ const Administration = () => {
                       {users.length > 0 ? (
                         users.map((user) => (
                           <TableRow key={user.id}>
+                            <TableCell>{user.full_name}</TableCell>
                             <TableCell>{user.email}</TableCell>
-                            <TableCell>{user.role}</TableCell>
+                            <TableCell>
+                              <Select
+                                defaultValue={user.role}
+                                onValueChange={(value: UserRole) => confirmRoleChange(user.id, value as UserRole)}
+                              >
+                                <SelectTrigger className="w-[120px]">
+                                  <SelectValue placeholder="Select role" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="admin">Admin</SelectItem>
+                                  <SelectItem value="user">User</SelectItem>
+                                  <SelectItem value="viewer">Viewer</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </TableCell>
                             <TableCell>{formatDate(user.created_at)}</TableCell>
                             <TableCell>{formatDate(user.last_sign_in_at)}</TableCell>
                             <TableCell>
-                              <div className="flex space-x-2">
-                                {user.role !== "admin" && (
-                                  <Button 
-                                    variant="outline" 
-                                    size="sm"
-                                    onClick={() => updateUserRole(user.id, "admin")}
-                                  >
-                                    Make Admin
-                                  </Button>
-                                )}
-                                {user.role !== "user" && (
-                                  <Button 
-                                    variant="outline" 
-                                    size="sm"
-                                    onClick={() => updateUserRole(user.id, "user")}
-                                  >
-                                    Make User
-                                  </Button>
-                                )}
-                                {user.role !== "viewer" && (
-                                  <Button 
-                                    variant="outline" 
-                                    size="sm"
-                                    onClick={() => updateUserRole(user.id, "viewer")}
-                                  >
-                                    Make Viewer
-                                  </Button>
-                                )}
-                              </div>
+                              {/* Additional actions can be added here if needed */}
                             </TableCell>
                           </TableRow>
                         ))
                       ) : (
                         <TableRow>
-                          <TableCell colSpan={5} className="text-center">
+                          <TableCell colSpan={6} className="text-center">
                             No users found
                           </TableCell>
                         </TableRow>
@@ -362,6 +373,25 @@ const Administration = () => {
           </TabsContent>
         </Tabs>
       </div>
+
+      {/* Role change confirmation dialog */}
+      <AlertDialog open={roleChangeDialog?.open || false} onOpenChange={(open) => {
+        if (!open) setRoleChangeDialog(null);
+      }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Change User Role</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to change this user's role to {roleChangeDialog?.newRole}? 
+              This will modify their permissions in the system.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={updateUserRole}>Confirm</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </MainLayout>
   );
 };
