@@ -102,6 +102,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         throw error;
       }
       console.log("Sign out successful");
+      // Force navigation to auth page
+      window.location.href = "/auth";
     } catch (error) {
       console.error("Exception during sign out:", error);
       toast.error("Error signing out");
