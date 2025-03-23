@@ -42,8 +42,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           console.log("User signed in:", session?.user?.email);
           console.log("User details:", session?.user);
           toast.success("Successfully signed in");
-          
-          // Update last_sign_in_at is now handled by the database trigger
         } else if (event === 'SIGNED_OUT') {
           console.log("User signed out");
           toast.info("Signed out");
@@ -73,7 +71,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const fetchUserRole = async (userId: string) => {
     try {
       const { data, error } = await supabase
-        .from('users')  // Changed from 'profiles' to 'users'
+        .from('users')
         .select('role')
         .eq('id', userId)
         .single();
