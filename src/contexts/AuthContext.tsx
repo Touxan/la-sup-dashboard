@@ -23,21 +23,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [userRole, setUserRole] = useState<UserRole>("user");
 
   useEffect(() => {
-    // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      console.log("Initial auth session:", session ? "Authenticated" : "Not authenticated");
-      setSession(session);
-      setUser(session?.user ?? null);
-      
-      if (session?.user) {
-        // Fetch user role from the database
-        fetchUserRole(session.user.id);
-      } else {
-        setLoading(false);
-      }
-    });
-
-    // Set up auth state listener
+    // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         console.log("Auth state changed:", event, session ? "Session exists" : "No session");
@@ -64,6 +50,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
       }
     );
+
+    // THEN check for existing session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      console.log("Initial auth session:", session ? "Authenticated" : "Not authenticated");
+      setSession(session);
+      setUser(session?.user ?? null);
+      
+      if (session?.user) {
+        // Fetch user role from the database
+        fetchUserRole(session.user.id);
+      } else {
+        setLoading(false);
+      }
+    });
 
     return () => {
       subscription.unsubscribe();

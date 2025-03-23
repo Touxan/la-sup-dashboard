@@ -22,7 +22,7 @@ const Auth = () => {
     setLoading(true);
     
     try {
-      const { error } = await supabase.auth.signInWithPassword({
+      const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
@@ -32,7 +32,6 @@ const Auth = () => {
       }
       
       console.log("Sign in successful, navigating to home");
-      toast.success("Signed in successfully");
       navigate("/");
     } catch (error: any) {
       console.error("Sign in error:", error);
