@@ -1,6 +1,7 @@
 
 import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import { Loader2 } from "lucide-react";
 
 const ProtectedRoute = () => {
   const { user, loading } = useAuth();
@@ -8,9 +9,14 @@ const ProtectedRoute = () => {
 
   console.log("ProtectedRoute - user:", user ? "exists" : "null", "loading:", loading);
 
-  // Show nothing while checking authentication
+  // Show loading spinner while checking authentication
   if (loading) {
-    return <div className="flex items-center justify-center min-h-screen">Loading...</div>;
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <p className="mt-4 text-muted-foreground">Loading...</p>
+      </div>
+    );
   }
 
   if (!user) {

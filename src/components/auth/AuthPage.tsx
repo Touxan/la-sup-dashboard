@@ -6,6 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from "@/contexts/AuthContext";
 import SignInForm from "./SignInForm";
 import SignUpForm from "./SignUpForm";
+import { Loader2 } from "lucide-react";
 
 const AuthPage = () => {
   const navigate = useNavigate();
@@ -24,7 +25,12 @@ const AuthPage = () => {
 
   // Show loading while authentication status is being checked
   if (loading) {
-    return <div className="flex items-center justify-center min-h-screen">Loading...</div>;
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <p className="mt-4 text-muted-foreground">Loading...</p>
+      </div>
+    );
   }
 
   // Don't render the auth form if user is authenticated (will be redirected by useEffect)

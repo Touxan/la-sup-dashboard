@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { Loader2 } from "lucide-react";
 
 const SignInForm = () => {
   const navigate = useNavigate();
@@ -57,6 +58,7 @@ const SignInForm = () => {
           onChange={(e) => setEmail(e.target.value)}
           placeholder="your@email.com"
           required
+          disabled={loading}
         />
       </div>
       <div className="space-y-2">
@@ -69,10 +71,16 @@ const SignInForm = () => {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
+          disabled={loading}
         />
       </div>
       <Button type="submit" className="w-full" disabled={loading}>
-        {loading ? "Signing in..." : "Sign In"}
+        {loading ? (
+          <>
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            Signing in...
+          </>
+        ) : "Sign In"}
       </Button>
     </form>
   );

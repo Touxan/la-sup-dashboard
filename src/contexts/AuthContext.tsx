@@ -25,7 +25,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     console.log("Setting up auth state listener");
     
-    // Set up auth state listener
+    // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         console.log("Auth state changed:", event, session ? "Session exists" : "No session");
@@ -52,7 +52,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     );
 
-    // Then check for existing session
+    // THEN check for existing session
     supabase.auth.getSession().then(({ data: { session } }) => {
       console.log("Initial auth session:", session ? "Authenticated" : "Not authenticated");
       setSession(session);
@@ -61,9 +61,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (session?.user) {
         // Fetch user role from the database
         fetchUserRole(session.user.id);
+      } else {
+        setLoading(false);
       }
-      
-      setLoading(false);
     });
 
     return () => {
@@ -89,16 +89,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         console.log("User role found:", data.role);
         setUserRole(data.role as UserRole);
       }
+      setLoading(false);
     } catch (error) {
       console.error("Error fetching user role:", error);
       // Default to user role if there's an error
       setUserRole("user");
+      setLoading(false);
     }
   };
 
   const signOut = async () => {
     try {
       console.log("Starting sign out process");
+      setLoading(true);
       const { error } = await supabase.auth.signOut();
       if (error) {
         console.error("Error signing out:", error);
@@ -111,6 +114,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch (error) {
       console.error("Exception during sign out:", error);
       toast.error("Error signing out");
+    } finally {
+      setLoading(false);
     }
   };
 
