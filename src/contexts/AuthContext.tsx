@@ -19,13 +19,13 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [userRole, setUserRole] = useState<UserRole>("user");
 
   useEffect(() => {
     console.log("Setting up auth state listener");
     
-    // Set up auth state listener FIRST
+    // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         console.log("Auth state changed:", event, session ? "Session exists" : "No session");
@@ -37,7 +37,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           await fetchUserRole(session.user.id);
         } else {
           setUserRole("user");
-          setLoading(false);
         }
         
         if (event === 'SIGNED_IN') {
@@ -51,7 +50,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     );
 
-    // THEN check for existing session
+    // Then check for existing session
     supabase.auth.getSession().then(({ data: { session } }) => {
       console.log("Initial auth session:", session ? "Authenticated" : "Not authenticated");
       setSession(session);
@@ -60,8 +59,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (session?.user) {
         // Fetch user role from the database
         fetchUserRole(session.user.id);
-      } else {
-        setLoading(false);
       }
     });
 
@@ -92,16 +89,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       console.error("Error fetching user role:", error);
       // Default to user role if there's an error
       setUserRole("user");
-    } finally {
-      console.log("Setting loading to false");
-      setLoading(false);
     }
   };
 
   const signOut = async () => {
     try {
       console.log("Starting sign out process");
-      setLoading(true);
       const { error } = await supabase.auth.signOut();
       if (error) {
         console.error("Error signing out:", error);
@@ -112,8 +105,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch (error) {
       console.error("Exception during sign out:", error);
       toast.error("Error signing out");
-    } finally {
-      setLoading(false);
     }
   };
 
