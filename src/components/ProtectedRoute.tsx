@@ -11,6 +11,14 @@ const ProtectedRoute = () => {
   console.log("ProtectedRoute - user:", user ? "exists" : "null", "loading:", loading, "userRole:", userRole);
   console.log("Current path:", location.pathname);
   
+  // Add effect to detect stale authentication states
+  useEffect(() => {
+    if (!user && !loading && localStorage.getItem("supabase.auth.token") === null) {
+      console.log("Session appears to be invalid, redirecting to auth");
+      window.location.href = "/auth";
+    }
+  }, [user, loading]);
+  
   // Check if current path is an admin-only route
   const isAdminRoute = location.pathname.startsWith("/administration");
   

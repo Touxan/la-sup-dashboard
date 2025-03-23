@@ -15,6 +15,8 @@ const AuthPage = () => {
   const [activeTab, setActiveTab] = useState("login");
   const [isRedirecting, setIsRedirecting] = useState(false);
   
+  console.log("AuthPage - Current auth state:", user ? "authenticated" : "not authenticated", "loading:", loading);
+  
   // Handle redirection if user is authenticated
   useEffect(() => {
     // Only redirect if we have a user and loading is complete

@@ -3,7 +3,6 @@ import { createContext, useContext, useEffect, useState, ReactNode } from "react
 import { supabase } from "@/integrations/supabase/client";
 import type { Session, User } from "@supabase/supabase-js";
 import { toast } from "sonner";
-import { useNavigate } from "react-router-dom";
 
 type UserRole = "admin" | "user" | "viewer";
 
@@ -53,8 +52,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             } else if (event === 'SIGNED_OUT') {
               toast.info("Signed out");
               setLoading(false);
-              // Force redirect to auth page on sign out
-              window.location.href = "/auth";
+              
+              // Clear all auth state immediately
+              setUser(null);
+              setSession(null);
+              setUserRole("user");
+              
+              // Force redirect to auth page on sign out - with a slight delay to ensure state is cleared
+              setTimeout(() => {
+                window.location.href = "/auth";
+              }, 100);
             }
           }
         );
@@ -147,20 +154,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signOut = async () => {
     try {
       console.log("Starting sign out process");
-      const { error } = await supabase.auth.signOut();
-      if (error) throw error;
       
-      console.log("Sign out successful");
-      // Clear all auth state
+      // First, clear all auth state to prevent any redirects to protected routes
       setUser(null);
       setSession(null);
       setUserRole("user");
       
-      // Force redirect to auth page - using window.location.href ensures a complete page refresh
-      window.location.href = "/auth";
+      // Then trigger the actual sign out
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+      
+      console.log("Sign out successful, redirecting to auth page");
+      
+      // Force immediate navigation to auth page without waiting for auth state change
+      window.location.replace("/auth");
     } catch (error) {
       console.error("Exception during sign out:", error);
       toast.error("Error signing out");
+      
+      // Even on error, try to redirect to auth page
+      window.location.replace("/auth");
     }
   };
 

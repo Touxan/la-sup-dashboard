@@ -75,9 +75,21 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
   const handleSignOut = async () => {
     console.log("Sign out clicked");
     try {
-      await signOut();
-      // Note: No need to navigate here as the signOut function already forces a redirect
+      // Disable links temporarily to prevent navigation during sign out
+      document.body.style.pointerEvents = "none";
+      document.body.style.opacity = "0.7";
+      
+      // Display toast before redirect
+      toast.info("Signing out...");
+      
+      // Add a small delay to ensure the toast is shown before redirect
+      setTimeout(async () => {
+        await signOut();
+      }, 300);
     } catch (error) {
+      // Re-enable interactions if error occurs
+      document.body.style.pointerEvents = "";
+      document.body.style.opacity = "";
       toast.error("Error signing out");
     }
   };
