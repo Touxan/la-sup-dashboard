@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Sidebar } from "@/components/ui/sidebar";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { useMobile } from "@/hooks/use-mobile";
+import { useIsMobile } from "@/hooks/use-mobile";
 import {
   LogOut,
   Settings,
@@ -19,7 +19,7 @@ import {
   Play,
   Bell,
   FileCode,
-  Certificate,
+  Key, // Changed from Certificate to Key
   UserCog,
 } from "lucide-react";
 
@@ -27,7 +27,7 @@ const MainLayout = () => {
   const { user, signOut, userRole } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const isMobile = useMobile();
+  const isMobile = useIsMobile();
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
   // Close sidebar on mobile by default
@@ -107,7 +107,7 @@ const MainLayout = () => {
     {
       name: "Certificates",
       path: "/certificates",
-      icon: <Certificate className="h-5 w-5" />,
+      icon: <Key className="h-5 w-5" />, // Changed from Certificate to Key
     },
     // Show Admin link only for admin users
     ...(userRole === "admin" ? [{
@@ -126,7 +126,7 @@ const MainLayout = () => {
     <div className="flex h-screen bg-background">
       {/* Sidebar */}
       <Sidebar
-        open={sidebarOpen}
+        isOpen={sidebarOpen} 
         onOpenChange={setSidebarOpen}
         className="border-r"
       >
