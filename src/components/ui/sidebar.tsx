@@ -60,4 +60,3 @@ const useSidebar = (): SidebarContextProps => {
 };
 
 export { Sidebar, SidebarProvider, useSidebar }
-
